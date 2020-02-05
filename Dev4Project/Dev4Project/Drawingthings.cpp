@@ -56,5 +56,5 @@ void Drawingthings::Render()
 	float color[] = { 0, 1, 1, 1 };
 	myContext->ClearRenderTargetView(myTargetv, color);
 
-	mySwapper->Present(0, 0);
+	mySwapper->Present(1, 0);
 }
