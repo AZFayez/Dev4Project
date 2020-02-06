@@ -156,9 +156,6 @@ void Drawingthings::Render()
 	//projection m
 	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / 2.0f, aspectRatio, 0.1f, 1000));
 
-	// draw
-	myContext->Draw(numverts, 0);
-
 	//upload matracies to video card
 	D3D11_MAPPED_SUBRESOURCE gpuBuff;
 	HRESULT hr =  myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
@@ -169,6 +166,8 @@ void Drawingthings::Render()
 	ID3D11Buffer* constants[] = { cBuff };
 	myContext->VSSetConstantBuffers(0, 1, constants);
 
+	// draw
+	myContext->Draw(numverts, 0);
 
 	mySwapper->Present(1, 0);
 }
