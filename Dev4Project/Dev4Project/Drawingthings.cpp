@@ -11,12 +11,16 @@ Drawingthings::~Drawingthings()
 	myContext->Release();
 	myTargetv->Release();
 	myLayout->Release();
+	myMeshLayout->Release();
 	vBuff->Release();
 	cBuff->Release();
 	vShader->Release();
+	vMeshShader->Release();
 	pShader->Release();
 	vBuffMesh->Release();
 	iBuffMesh->Release();
+	zBuffer->Release();
+	zBufferView->Release();
 }
 
 void Drawingthings::Init(HWND &hwnd)
@@ -147,20 +151,53 @@ void Drawingthings::Init(HWND &hwnd)
 
 	//load new mesh shader
 	
-	//hr = myDevice->CreateVertexShader(MyVMeshShader, sizeof(MyVMeshShader), nullptr, &vShader);
+	hr = myDevice->CreateVertexShader(MyVMeshShader, sizeof(MyVMeshShader), nullptr, &vMeshShader);
 
+	// make new input layout for new shape because data format is different
+
+	D3D11_INPUT_ELEMENT_DESC MeshiDesc[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	};
+
+	hr = myDevice->CreateInputLayout(MeshiDesc, 3, MyVMeshShader, sizeof(MyVMeshShader), &myMeshLayout);
+
+	// making a z buffer
+	D3D11_TEXTURE2D_DESC zDesc;
+	ZeroMemory(&zDesc, sizeof(zDesc));
+
+	zDesc.ArraySize = 1;
+	zDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	zDesc.Width = swap.BufferDesc.Width;
+	zDesc.Height = swap.BufferDesc.Height;
+	zDesc.Usage = D3D11_USAGE_DEFAULT;
+	zDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	zDesc.MipLevels = 1;
+	zDesc.SampleDesc.Count = 1;
+
+	hr = myDevice->CreateTexture2D(&zDesc, nullptr, &zBuffer);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dDesc;
+	ZeroMemory(&dDesc, sizeof(dDesc));
+
+	hr = myDevice->CreateDepthStencilView(zBuffer, nullptr, &zBufferView);
 }
 
 void Drawingthings::Render()
 {
-	float color[] = { 0, 0 , 0, 1 };
+	float color[] = { 0, 0, 0, 1 };
 	myContext->ClearRenderTargetView(myTargetv, color);
 
-	// setup the pipeline
+	// setup the pipeline)
 
 	// output merger
 	ID3D11RenderTargetView* tempRTv[] = { myTargetv };
-	myContext->OMSetRenderTargets(1, tempRTv, nullptr);
+	myContext->OMSetRenderTargets(1, tempRTv, zBufferView);
+
+	//clear z buffer
+	myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
 
 	// rasterizer
 	myContext->RSSetViewports(1, &myPort);
@@ -179,10 +216,10 @@ void Drawingthings::Render()
 	myContext->PSSetShader(pShader, 0, 0);
 
 	//world m
-	XMMATRIX temp = XMMatrixTranslation(0, 0, 2);
+	XMMATRIX temp = XMMatrixTranslation(3, 2, -5);
 	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixMultiply(XMMatrixRotationY(rot), temp));
 	//view m
-	XMStoreFloat4x4(&MyMatracies.vMatrix, XMMatrixLookAtLH({ 2,2,-3 }, { 0,0,1 }, { 0,1,0 }));
+	XMStoreFloat4x4(&MyMatracies.vMatrix, XMMatrixLookAtLH({ 1, 5,-10 }, { 0,0,0 }, { 0,1,0 }));
 	//projection m
 	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / 2.0f, aspectRatio, 0.1f, 1000));
 
@@ -198,6 +235,26 @@ void Drawingthings::Render()
 
 	// draw
 	myContext->Draw(numverts, 0);
+
+
+	//drawing second item
+	myContext->IASetInputLayout(myMeshLayout);
+	UINT mesh_strides[] = { sizeof(_OBJ_VERT_) };
+	UINT mesh_offsets[] = { 0 };
+	ID3D11Buffer* meshVB[] = { vBuffMesh };
+
+	myContext->IASetVertexBuffers(0, 1, meshVB, mesh_strides, mesh_offsets);
+	myContext->IASetIndexBuffer(iBuffMesh, DXGI_FORMAT_R32_UINT, 0);
+	myContext->VSSetShader(vMeshShader, 0, 0);
+
+	//change world matrix
+	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0, 0, 0));
+	//upload new matrix to video card
+	hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+	myContext->Unmap(cBuff, 0);
+
+	myContext->DrawIndexed(2532, 0, 0);
 
 	mySwapper->Present(1, 0);
 }

@@ -34,12 +34,16 @@ private:
 	ID3D11DeviceContext			*myContext = nullptr;
 	ID3D11RenderTargetView		*myTargetv = nullptr;
 	ID3D11InputLayout			*myLayout = nullptr;
+	ID3D11InputLayout			*myMeshLayout = nullptr;
 	ID3D11Buffer				*vBuff = nullptr;
 	ID3D11Buffer				*cBuff = nullptr;
 	ID3D11Buffer				*vBuffMesh = nullptr;
 	ID3D11Buffer				*iBuffMesh = nullptr;
 	ID3D11VertexShader			*vShader = nullptr;
 	ID3D11PixelShader			*pShader = nullptr;
+	ID3D11VertexShader			*vMeshShader = nullptr;
+	ID3D11Texture2D				*zBuffer = nullptr;
+	ID3D11DepthStencilView		*zBufferView = nullptr;
 	CD3D11_VIEWPORT				myPort;
 	D3D_FEATURE_LEVEL			dx11;
 	DXGI_SWAP_CHAIN_DESC		swap;
