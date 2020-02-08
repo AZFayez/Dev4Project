@@ -154,9 +154,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Assets\StoneHenge.h" />
+    <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="Dev4Project.h" />
     <ClInclude Include="Drawingthings.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="MYPMeshShader.h" />
     <ClInclude Include="MypShader.h" />
     <ClInclude Include="MyVertx.h" />
     <ClInclude Include="MyVMeshShader.h" />
@@ -164,6 +166,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="Dev4Project.cpp" />
     <ClCompile Include="Drawingthings.cpp" />
   </ItemGroup>
@@ -175,6 +178,12 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="MYPMeshShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="MypShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

@@ -21,6 +21,8 @@ Drawingthings::~Drawingthings()
 	iBuffMesh->Release();
 	zBuffer->Release();
 	zBufferView->Release();
+	meshTexture->Release();
+	pMeshShader->Release();
 }
 
 void Drawingthings::Init(HWND &hwnd)
@@ -152,6 +154,7 @@ void Drawingthings::Init(HWND &hwnd)
 	//load new mesh shader
 	
 	hr = myDevice->CreateVertexShader(MyVMeshShader, sizeof(MyVMeshShader), nullptr, &vMeshShader);
+	myDevice->CreatePixelShader(MYPMeshShader, sizeof(MYPMeshShader), nullptr, &pMeshShader);
 
 	// make new input layout for new shape because data format is different
 
@@ -183,6 +186,8 @@ void Drawingthings::Init(HWND &hwnd)
 	ZeroMemory(&dDesc, sizeof(dDesc));
 
 	hr = myDevice->CreateDepthStencilView(zBuffer, nullptr, &zBufferView);
+
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/StoneHenge.dds", nullptr, &meshTexture);
 }
 
 void Drawingthings::Render()
@@ -246,6 +251,8 @@ void Drawingthings::Render()
 	myContext->IASetVertexBuffers(0, 1, meshVB, mesh_strides, mesh_offsets);
 	myContext->IASetIndexBuffer(iBuffMesh, DXGI_FORMAT_R32_UINT, 0);
 	myContext->VSSetShader(vMeshShader, 0, 0);
+	myContext->PSSetShader(pMeshShader, 0, 0);
+	myContext->PSSetShaderResources(0, 1, &meshTexture);
 
 	//change world matrix
 	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0, 0, 0));

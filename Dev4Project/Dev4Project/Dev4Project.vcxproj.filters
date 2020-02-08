@@ -45,12 +45,21 @@
     <ClInclude Include="MyVMeshShader.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MYPMeshShader.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dev4Project.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Drawingthings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -75,6 +84,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="MyVMeshShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="MYPMeshShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

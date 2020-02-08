@@ -5,7 +5,9 @@
 #include "MyVertx.h"
 #include "MypShader.h"
 #include "MyVMeshShader.h"
+#include "MyPMeshShader.h"
 #include "Assets/StoneHenge.h"
+#include "DDSTextureLoader.h"
 
 using namespace DirectX;
 
@@ -42,8 +44,10 @@ private:
 	ID3D11VertexShader			*vShader = nullptr;
 	ID3D11PixelShader			*pShader = nullptr;
 	ID3D11VertexShader			*vMeshShader = nullptr;
+	ID3D11PixelShader			*pMeshShader = nullptr;
 	ID3D11Texture2D				*zBuffer = nullptr;
 	ID3D11DepthStencilView		*zBufferView = nullptr;
+	ID3D11ShaderResourceView	*meshTexture = nullptr;
 	CD3D11_VIEWPORT				myPort;
 	D3D_FEATURE_LEVEL			dx11;
 	DXGI_SWAP_CHAIN_DESC		swap;

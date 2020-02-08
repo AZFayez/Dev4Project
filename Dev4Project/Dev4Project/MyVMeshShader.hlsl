@@ -16,7 +16,9 @@ struct MyVertex
 struct OutputVert
 {
     float4 pos : SV_POSITION;
-    float4 clr : OCOLOR;
+    float3 uvw : OTEXCOORD;
+    float3 nrm : ONORMAL;
+    
 };
 
 cbuffer SHADER_VAR : register(b0)
@@ -30,7 +32,8 @@ OutputVert main( MyVertex input)
 {
     OutputVert Myout = (OutputVert)0;
     Myout.pos = float4(input.pos, 1);
-    Myout.clr.xyz = input.nrm;
+    Myout.nrm = input.nrm;
+    Myout.uvw = input.uvw;
     
     //Math goes below
     
