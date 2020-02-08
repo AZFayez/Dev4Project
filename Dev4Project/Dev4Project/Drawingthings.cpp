@@ -15,6 +15,8 @@ Drawingthings::~Drawingthings()
 	cBuff->Release();
 	vShader->Release();
 	pShader->Release();
+	vBuffMesh->Release();
+	iBuffMesh->Release();
 }
 
 void Drawingthings::Init(HWND &hwnd)
@@ -48,8 +50,8 @@ void Drawingthings::Init(HWND &hwnd)
 
 	backbuffer->Release();
 
-	myPort.Width = swap.BufferDesc.Width;
-	myPort.Height = swap.BufferDesc.Height;
+	myPort.Width = static_cast<float>(swap.BufferDesc.Width);
+	myPort.Height = static_cast<float>(swap.BufferDesc.Height);
 	myPort.TopLeftX = myPort.TopLeftY = 0;
 	myPort.MinDepth = 0;
 	myPort.MaxDepth = 1;
@@ -87,7 +89,7 @@ void Drawingthings::Init(HWND &hwnd)
 	bDesc.CPUAccessFlags = 0;
 	bDesc.MiscFlags = 0;
 	bDesc.StructureByteStride = 0;
-	bDesc.Usage = D3D11_USAGE_DEFAULT;
+	bDesc.Usage = D3D11_USAGE_IMMUTABLE;
 
 	subData.pSysMem = tri;
 
@@ -119,6 +121,34 @@ void Drawingthings::Init(HWND &hwnd)
 	bDesc.Usage = D3D11_USAGE_DYNAMIC;
 
 	hr = myDevice->CreateBuffer(&bDesc, nullptr, &cBuff);
+
+	ZeroMemory(&bDesc, sizeof(bDesc));
+	ZeroMemory(&subData, sizeof(subData));
+
+	bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bDesc.ByteWidth = sizeof(StoneHenge_data);
+	bDesc.CPUAccessFlags = 0;
+	bDesc.MiscFlags = 0;
+	bDesc.StructureByteStride = 0;
+	bDesc.Usage = D3D11_USAGE_IMMUTABLE;
+
+	subData.pSysMem = StoneHenge_data;
+
+	hr = myDevice->CreateBuffer(&bDesc, &subData, &vBuffMesh); // vertex buffer
+
+	//index buffer
+	ZeroMemory(&subData, sizeof(subData));
+
+	bDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bDesc.ByteWidth = sizeof(StoneHenge_indicies);
+	subData.pSysMem = StoneHenge_indicies;
+
+	hr = myDevice->CreateBuffer(&bDesc, &subData, &iBuffMesh);
+
+	//load new mesh shader
+	
+	//hr = myDevice->CreateVertexShader(MyVMeshShader, sizeof(MyVMeshShader), nullptr, &vShader);
+
 }
 
 void Drawingthings::Render()

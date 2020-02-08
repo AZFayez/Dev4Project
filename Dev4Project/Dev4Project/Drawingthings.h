@@ -4,6 +4,8 @@
 #include <DirectXMath.h>
 #include "MyVertx.h"
 #include "MypShader.h"
+#include "MyVMeshShader.h"
+#include "Assets/StoneHenge.h"
 
 using namespace DirectX;
 
@@ -34,6 +36,8 @@ private:
 	ID3D11InputLayout			*myLayout = nullptr;
 	ID3D11Buffer				*vBuff = nullptr;
 	ID3D11Buffer				*cBuff = nullptr;
+	ID3D11Buffer				*vBuffMesh = nullptr;
+	ID3D11Buffer				*iBuffMesh = nullptr;
 	ID3D11VertexShader			*vShader = nullptr;
 	ID3D11PixelShader			*pShader = nullptr;
 	CD3D11_VIEWPORT				myPort;

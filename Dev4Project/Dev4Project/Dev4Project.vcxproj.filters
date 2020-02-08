@@ -39,6 +39,12 @@
     <ClInclude Include="MyVertx.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Assets\StoneHenge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MyVMeshShader.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dev4Project.cpp">
@@ -66,6 +72,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="MyVertx.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="MyVMeshShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
