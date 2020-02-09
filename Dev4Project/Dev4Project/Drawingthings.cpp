@@ -6,23 +6,23 @@ Drawingthings::Drawingthings()
 
 Drawingthings::~Drawingthings()
 {
-	myDevice->Release();
-	mySwapper->Release();
-	myContext->Release();
-	myTargetv->Release();
-	myLayout->Release();
-	myMeshLayout->Release();
-	vBuff->Release();
-	cBuff->Release();
-	vShader->Release();
-	vMeshShader->Release();
-	pShader->Release();
-	vBuffMesh->Release();
-	iBuffMesh->Release();
-	zBuffer->Release();
-	zBufferView->Release();
-	meshTexture->Release();
-	pMeshShader->Release();
+	if (myDevice) myDevice->Release();
+	if (mySwapper) mySwapper->Release();
+	if (myContext) myContext->Release();
+	if (myTargetv) myTargetv->Release();
+	if (myLayout) myLayout->Release();
+	if (myMeshLayout) myMeshLayout->Release();
+	if (vBuff) vBuff->Release();
+	if (cBuff) cBuff->Release();
+	if (vShader) vShader->Release();
+	if (vMeshShader) vMeshShader->Release();
+	if (pShader) pShader->Release();
+	if (vBuffMesh) vBuffMesh->Release();
+	if (iBuffMesh) iBuffMesh->Release();
+	if (zBuffer) zBuffer->Release();
+	if (zBufferView) zBufferView->Release();
+	if (meshTexture) meshTexture->Release();
+	if (pMeshShader) pMeshShader->Release();
 }
 
 void Drawingthings::Init(HWND &hwnd)
@@ -251,8 +251,8 @@ void Drawingthings::Render()
 	myContext->IASetVertexBuffers(0, 1, meshVB, mesh_strides, mesh_offsets);
 	myContext->IASetIndexBuffer(iBuffMesh, DXGI_FORMAT_R32_UINT, 0);
 	myContext->VSSetShader(vMeshShader, 0, 0);
-	myContext->PSSetShader(pMeshShader, 0, 0);
-	myContext->PSSetShaderResources(0, 1, &meshTexture);
+	//myContext->PSSetShader(pMeshShader, 0, 0);
+	//myContext->PSSetShaderResources(0, 1, &meshTexture);
 
 	//change world matrix
 	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0, 0, 0));
