@@ -51,6 +51,12 @@
     <ClInclude Include="MYPMeshShader.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="CameraControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexVertexShader.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dev4Project.cpp">
@@ -60,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -87,6 +96,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="MYPMeshShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ComplexVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ComplexPShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

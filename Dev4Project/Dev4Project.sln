@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dev4Project", "Dev4Project\Dev4Project.vcxproj", "{8072B42F-3704-4F64-AA0A-FB1A21A95795}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBXExporter", "Dev4Project\FBXExporter\FBXExporter.vcxproj", "{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{8072B42F-3704-4F64-AA0A-FB1A21A95795}.Release|x64.Build.0 = Release|x64
 		{8072B42F-3704-4F64-AA0A-FB1A21A95795}.Release|x86.ActiveCfg = Release|Win32
 		{8072B42F-3704-4F64-AA0A-FB1A21A95795}.Release|x86.Build.0 = Release|Win32
+		{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}.Debug|x64.ActiveCfg = Debug|x64
+		{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}.Debug|x64.Build.0 = Debug|x64
+		{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}.Debug|x86.ActiveCfg = Debug|Win32
+		{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}.Debug|x86.Build.0 = Debug|Win32
+		{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}.Release|x64.ActiveCfg = Release|x64
+		{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}.Release|x64.Build.0 = Release|x64
+		{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}.Release|x86.ActiveCfg = Release|Win32
+		{1BB70216-4693-4FEA-AE75-EB8C37A4AC89}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

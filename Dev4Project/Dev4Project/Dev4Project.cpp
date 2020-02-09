@@ -63,6 +63,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             break;
 
         artist.rot += 0.1f;
+        artist.CameraMove();
         artist.Render();
     }
 

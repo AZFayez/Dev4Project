@@ -19,10 +19,16 @@ Drawingthings::~Drawingthings()
 	if (pShader) pShader->Release();
 	if (vBuffMesh) vBuffMesh->Release();
 	if (iBuffMesh) iBuffMesh->Release();
+	if (vBuffCMesh) vBuffCMesh->Release();
+	if (iBuffCMesh) iBuffCMesh->Release();
 	if (zBuffer) zBuffer->Release();
 	if (zBufferView) zBufferView->Release();
 	if (meshTexture) meshTexture->Release();
 	if (pMeshShader) pMeshShader->Release();
+	if (ComplexvMeshShader) ComplexvMeshShader->Release();
+	if (ComplexpMeshShader) ComplexpMeshShader->Release();
+	if (myComplexMeshLayout) myComplexMeshLayout->Release();
+	if (CmeshTexture) CmeshTexture->Release();
 }
 
 void Drawingthings::Init(HWND &hwnd)
@@ -188,6 +194,45 @@ void Drawingthings::Init(HWND &hwnd)
 	hr = myDevice->CreateDepthStencilView(zBuffer, nullptr, &zBufferView);
 
 	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/StoneHenge.dds", nullptr, &meshTexture);
+
+	hr = myDevice->CreateVertexShader(ComplexVertexShader, sizeof(ComplexVertexShader), nullptr, &ComplexvMeshShader);
+	myDevice->CreatePixelShader(ComplexPShader, sizeof(ComplexPShader), nullptr, &ComplexpMeshShader);
+
+	D3D11_INPUT_ELEMENT_DESC ComplexMeshiDesc[] =
+	{
+		 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	hr = myDevice->CreateInputLayout(ComplexMeshiDesc, 3, ComplexVertexShader, sizeof(ComplexVertexShader), &myComplexMeshLayout);
+
+	LoadMesh("./Assets/Axe.mesh", simpleMesh);
+
+	ZeroMemory(&bDesc, sizeof(bDesc));
+	ZeroMemory(&subData, sizeof(subData));
+
+	bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bDesc.ByteWidth = sizeof(SimpleVertex) * simpleMesh.vertexList.size();
+	bDesc.CPUAccessFlags = 0;
+	bDesc.MiscFlags = 0;
+	bDesc.StructureByteStride = 0;
+	bDesc.Usage = D3D11_USAGE_IMMUTABLE;
+
+	subData.pSysMem = simpleMesh.vertexList.data();
+
+	hr = myDevice->CreateBuffer(&bDesc, &subData, &vBuffCMesh); // vertex buffer
+
+	//index buffer
+	ZeroMemory(&subData, sizeof(subData));
+
+	bDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bDesc.ByteWidth = sizeof(int) * simpleMesh.indicesList.size();
+	subData.pSysMem = simpleMesh.indicesList.data();
+
+	hr = myDevice->CreateBuffer(&bDesc, &subData, &iBuffCMesh);
+
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/axeTexture.dds", nullptr, &CmeshTexture);
 }
 
 void Drawingthings::Render()
@@ -224,7 +269,7 @@ void Drawingthings::Render()
 	XMMATRIX temp = XMMatrixTranslation(3, 2, -5);
 	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixMultiply(XMMatrixRotationY(rot), temp));
 	//view m
-	XMStoreFloat4x4(&MyMatracies.vMatrix, XMMatrixLookAtLH({ 1, 5,-10 }, { 0,0,0 }, { 0,1,0 }));
+	MyMatracies.vMatrix = camera.getView();
 	//projection m
 	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / 2.0f, aspectRatio, 0.1f, 1000));
 
@@ -251,8 +296,8 @@ void Drawingthings::Render()
 	myContext->IASetVertexBuffers(0, 1, meshVB, mesh_strides, mesh_offsets);
 	myContext->IASetIndexBuffer(iBuffMesh, DXGI_FORMAT_R32_UINT, 0);
 	myContext->VSSetShader(vMeshShader, 0, 0);
-	//myContext->PSSetShader(pMeshShader, 0, 0);
-	//myContext->PSSetShaderResources(0, 1, &meshTexture);
+	myContext->PSSetShader(pMeshShader, 0, 0);
+	myContext->PSSetShaderResources(0, 1, &meshTexture);
 
 	//change world matrix
 	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0, 0, 0));
@@ -261,7 +306,70 @@ void Drawingthings::Render()
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
 
-	myContext->DrawIndexed(2532, 0, 0);
+	//myContext->DrawIndexed(2532, 0, 0);
+
+	myContext->IASetInputLayout(myComplexMeshLayout);
+	UINT Cmesh_strides[] = { sizeof(SimpleVertex) };
+	UINT Cmesh_offsets[] = { 0 };
+	ID3D11Buffer* CmeshVB[] = { vBuffCMesh };
+	myContext->IASetVertexBuffers(0, 1, CmeshVB, Cmesh_strides, Cmesh_offsets);
+	myContext->IASetIndexBuffer(iBuffCMesh, DXGI_FORMAT_R32_UINT, 0);
+	myContext->VSSetShader(ComplexvMeshShader, 0, 0);
+	myContext->PSSetShader(ComplexpMeshShader, 0, 0);
+	myContext->PSSetShaderResources(0, 1, &CmeshTexture);
+
+	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0, 0, 0));
+	//upload new matrix to video card
+	hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+	myContext->Unmap(cBuff, 0);
+
+	myContext->DrawIndexed(simpleMesh.indicesList.size(), 0, 0);
 
 	mySwapper->Present(1, 0);
+}
+
+void Drawingthings::CameraMove()
+{
+	camera.Movement();
+}
+
+void Drawingthings::LoadMesh(const char* meshFileName, SimpleMesh& mesh)
+{
+	std::fstream file{ meshFileName, std::ios_base::in | std::ios_base::binary };
+
+	assert(file.is_open());
+
+	uint32_t player_index_count;
+	file.read((char*)&player_index_count, sizeof(uint32_t));
+
+	mesh.indicesList.resize(player_index_count);
+
+	file.read((char*)mesh.indicesList.data(), sizeof(uint32_t) * player_index_count);
+	uint32_t player_vertex_count;
+	file.read((char*)&player_vertex_count, sizeof(uint32_t));
+
+	mesh.vertexList.resize(player_vertex_count);
+
+	file.read((char*)mesh.vertexList.data(), sizeof(SimpleVertex) * player_vertex_count);
+
+	// Example mesh conditioning if needed - this flips handedness
+	for (auto& v : mesh.vertexList)
+	{
+		v.Pos.x = -v.Pos.x;
+		v.Normal.x = -v.Normal.x;
+		v.Tex.y = 1.0f - v.Tex.y;
+	}
+
+	int tri_count = (int)(mesh.indicesList.size() / 3);
+
+	for (int i = 0; i < tri_count; ++i)
+	{
+		int* tri = mesh.indicesList.data() + i * 3;
+
+		int temp = tri[0];
+		tri[0] = tri[2];
+		tri[2] = temp;
+	}
+	file.close();
 }

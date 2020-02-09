@@ -154,6 +154,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Assets\StoneHenge.h" />
+    <ClInclude Include="CameraControl.h" />
+    <ClInclude Include="ComplexVertexShader.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="Dev4Project.h" />
     <ClInclude Include="Drawingthings.h" />
@@ -166,6 +168,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CameraControl.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="Dev4Project.cpp" />
     <ClCompile Include="Drawingthings.cpp" />
@@ -178,6 +181,18 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="ComplexPShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="ComplexVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="MYPMeshShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
