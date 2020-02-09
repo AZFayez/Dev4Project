@@ -8,10 +8,5 @@ Documentation
 *.db
 *.opensdf
 *.user
-*.fbx
-*.mesh
-*.tga
-*.dds
 *.exe
-*.obj
 /Dev4Project/.vs/Dev4Project/v16
