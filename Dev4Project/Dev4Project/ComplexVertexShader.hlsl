@@ -12,11 +12,23 @@ struct PS_INPUT
     float2 Tex : OTEXCOORD1;
 };
 
+struct Lights
+{
+    float4 position, lightDirection;
+    float4 ambient, diffuse, specular;
+    float _constant, _linear, _exponent;
+    unsigned int lightType;
+    float cosineInnerCone, cosineOuterCone;
+    float lightRadius;
+    int lightOn;
+};
+
 cbuffer SHADER_VAR : register(b0)
 {
     float4x4 worldMatrix;
     float4x4 viewMatrix;
     float4x4 projMatrix;
+    Lights light[3];
 };
 
 PS_INPUT main( VS_INPUT input ) 

@@ -29,11 +29,22 @@ public:
 	float						rot = 0;
 
 private:
+	struct Lights
+	{
+		XMFLOAT4 position, lightDirection;
+		XMFLOAT4 ambient, diffuse, specular;
+		float _constant, _linear, _exponent;
+		unsigned int lightType;
+		float cosineInnerCone, cosineOuterCone;
+		float lightRadius;
+		int lightOn;
+	};
 	struct WVP
 	{
 		XMFLOAT4X4 wMatrix;
 		XMFLOAT4X4 vMatrix;
 		XMFLOAT4X4 pMatrix;
+		Lights lights[3];
 	}MyMatracies;
 	struct SimpleVertex
 	{
