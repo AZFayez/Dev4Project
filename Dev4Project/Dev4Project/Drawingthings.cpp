@@ -306,7 +306,7 @@ void Drawingthings::Render()
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
 
-	//myContext->DrawIndexed(2532, 0, 0);
+	myContext->DrawIndexed(2532, 0, 0);
 
 	myContext->IASetInputLayout(myComplexMeshLayout);
 	UINT Cmesh_strides[] = { sizeof(SimpleVertex) };
@@ -318,7 +318,7 @@ void Drawingthings::Render()
 	myContext->PSSetShader(ComplexpMeshShader, 0, 0);
 	myContext->PSSetShaderResources(0, 1, &CmeshTexture);
 
-	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0, 0, 0));
+	XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0, 5, 0));
 	//upload new matrix to video card
 	hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));

@@ -2,6 +2,8 @@
 
 CameraControl::CameraControl()
 {
+	translateY = 3;
+	translateZ = -10;
 	XMStoreFloat4x4(&View, XMMatrixIdentity());
 }
 
