@@ -15,7 +15,7 @@ struct PS_INPUT
 struct Lights
 {
     float4 position, lightDirection;
-    float4 ambient, diffuse, specular;
+    float4 ambient, diffuse, specular, lightColor;
     float _constant, _linear, _exponent;
     unsigned int lightType;
     float cosineInnerCone, cosineOuterCone;
@@ -35,7 +35,7 @@ PS_INPUT main( VS_INPUT input )
 {
     PS_INPUT output = (PS_INPUT)0;
     output.Pos = input.Pos;
-    output.Norm = input.Norm;
+    output.Norm = mul(float4(input.Norm, 1), worldMatrix).xyz;
     output.Tex = input.Tex;
     
     output.Pos = mul(worldMatrix, output.Pos);

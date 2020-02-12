@@ -237,7 +237,44 @@ void Drawingthings::Init(HWND &hwnd)
 
 void Drawingthings::Render()
 {
-	float color[] = { 0, 0, 0, 1 };
+	if (GetAsyncKeyState(0x4A) && 0x8000)
+	{
+		zoom += 0.1f;
+		if (zoom > 6.0f)
+			zoom = 6.0f;
+	}
+	if (GetAsyncKeyState(0x4B) && 0x8000)
+	{
+		zoom -= 0.1f;
+		if (zoom < 2.0f)
+			zoom = 2.0f;
+	}
+	if (GetAsyncKeyState(0x4E) && 0x8000)
+	{
+		nearplane += 0.01f;
+		if (nearplane > 3.0f)
+			nearplane = 3.0f;
+	}
+	if (GetAsyncKeyState(0x4D) && 0x8000)
+	{
+		nearplane -= 0.01f;
+		if (nearplane <0.1f)
+			nearplane = 0.1f;
+	}
+	if (GetAsyncKeyState(0x43) && 0x8000)
+	{
+		farplane += 5;
+		if (nearplane > 1000)
+			farplane = 1000;
+	}
+	if (GetAsyncKeyState(0x56) && 0x8000)
+	{
+		farplane -= 5;
+		if (farplane <= (nearplane + 1))
+			farplane = nearplane + 1;
+	}
+	aspectRatio = swap.BufferDesc.Width / static_cast<float>(swap.BufferDesc.Height);
+	float color[] = { 0, 1, 1, 1 };
 	myContext->ClearRenderTargetView(myTargetv, color);
 
 	// setup the pipeline)
@@ -271,7 +308,14 @@ void Drawingthings::Render()
 	//view m
 	MyMatracies.vMatrix = camera.getView();
 	//projection m
-	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / 2.0f, aspectRatio, 0.1f, 1000));
+	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / zoom, aspectRatio, nearplane, farplane));
+	//light Direction
+	MyMatracies.lights[0].lightDirection = { -1, -1, 0, 0 };
+	MyMatracies.lights[0].lightColor = { 0.75f, 0, 0, 1 };
+	MyMatracies.lights[1].position = { 10, 5, -2, 0 };
+	MyMatracies.lights[1].lightColor = { 1, 1, 1, 1 };
+
+//	MyMatracies.lights[0]. = { 1, 1, 1, 1 };
 
 	//upload matracies to video card
 	D3D11_MAPPED_SUBRESOURCE gpuBuff;
@@ -305,6 +349,7 @@ void Drawingthings::Render()
 	hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
+	myContext->PSSetConstantBuffers(0, 1, constants);
 
 	myContext->DrawIndexed(2532, 0, 0);
 

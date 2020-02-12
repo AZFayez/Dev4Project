@@ -24,7 +24,7 @@ struct OutputVert
 struct Lights
 {
     float4 position, lightDirection;
-    float4 ambient, diffuse, specular;
+    float4 ambient, diffuse, specular, lightColor;
     float _constant, _linear, _exponent;
     unsigned int lightType;
     float cosineInnerCone, cosineOuterCone;
@@ -44,7 +44,7 @@ OutputVert main( MyVertex input)
 {
     OutputVert Myout = (OutputVert)0;
     Myout.pos = float4(input.pos, 1);
-    Myout.nrm = input.nrm;
+    Myout.nrm = mul(float4(input.nrm, 1), worldMatrix).xyz;
     Myout.uvw = input.uvw;
     
     //Math goes below

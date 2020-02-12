@@ -8,5 +8,4 @@ Documentation
 *.db
 *.opensdf
 *.user
-*.exe
 /Dev4Project/.vs/Dev4Project/v16

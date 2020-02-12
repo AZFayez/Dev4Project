@@ -32,7 +32,7 @@ private:
 	struct Lights
 	{
 		XMFLOAT4 position, lightDirection;
-		XMFLOAT4 ambient, diffuse, specular;
+		XMFLOAT4 ambient, diffuse, specular, lightColor;
 		float _constant, _linear, _exponent;
 		unsigned int lightType;
 		float cosineInnerCone, cosineOuterCone;
@@ -63,6 +63,9 @@ private:
 	// Math
 	unsigned int				numverts = 0;
 	float						aspectRatio = 1;
+	float						zoom = 2.0f;
+	float						farplane = 1000;
+	float						nearplane = 0.1f;
 	CameraControl				camera;
 	
 	ID3D11Device				*myDevice = nullptr;
