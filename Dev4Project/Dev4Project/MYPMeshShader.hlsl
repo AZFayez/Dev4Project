@@ -6,6 +6,7 @@ struct OutputVert
     float4 pos : SV_POSITION;
     float3 uvw : OTEXCOORD;
     float3 nrm : ONORMAL;
+    float4 posW : WPOSITION;
 };
 
 struct Lights
@@ -32,6 +33,9 @@ float4 main(OutputVert inputPixel) : SV_TARGET
 {
     float4 finalColor = 0;
     finalColor = txDiffuse.Sample(samLinear,inputPixel.uvw.xy);
-    finalColor *= saturate(dot(-normalize(light[0].lightDirection.xyz), inputPixel.nrm)) * light[0].lightColor;
-	return finalColor;
+    float4 Dirlight = saturate(dot(-normalize(light[0].lightDirection.xyz), normalize(inputPixel.nrm))) * light[0].lightColor;
+    float4 Pointlight = saturate(dot(normalize(light[1].position - inputPixel.posW).xyz, normalize(inputPixel.nrm))) * light[1].lightColor;
+    float pointAttinuation = 1 - saturate(length(light[1].position - inputPixel.posW) / light[1].lightRadius);
+    Pointlight *= pointAttinuation;
+    return finalColor * saturate( Pointlight + Dirlight);
 }

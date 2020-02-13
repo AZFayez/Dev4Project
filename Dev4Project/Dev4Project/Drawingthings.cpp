@@ -310,10 +310,15 @@ void Drawingthings::Render()
 	//projection m
 	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / zoom, aspectRatio, nearplane, farplane));
 	//light Direction
+	XMVECTOR templight = { 0, 1, 0, 1 };
+	//templight = XMVector4Transform(templight, XMLoadFloat4x4(&MyMatracies.wMatrix));
+	//templight = XMVector4Transform(templight, XMLoadFloat4x4(&MyMatracies.vMatrix));
+	//templight = XMVector4Transform(templight, XMLoadFloat4x4(&MyMatracies.pMatrix));
 	MyMatracies.lights[0].lightDirection = { -1, -1, 0, 0 };
 	MyMatracies.lights[0].lightColor = { 0.75f, 0, 0, 1 };
-	MyMatracies.lights[1].position = { 10, 5, -2, 0 };
+	XMStoreFloat4(&MyMatracies.lights[1].position, templight);
 	MyMatracies.lights[1].lightColor = { 1, 1, 1, 1 };
+	MyMatracies.lights[1].lightRadius = 10;
 
 //	MyMatracies.lights[0]. = { 1, 1, 1, 1 };
 

@@ -18,6 +18,7 @@ struct OutputVert
     float4 pos : SV_POSITION;
     float3 uvw : OTEXCOORD;
     float3 nrm : ONORMAL;
+    float4 posW : WPOSITION;
     
 };
 
@@ -44,12 +45,12 @@ OutputVert main( MyVertex input)
 {
     OutputVert Myout = (OutputVert)0;
     Myout.pos = float4(input.pos, 1);
-    Myout.nrm = mul(float4(input.nrm, 1), worldMatrix).xyz;
+    Myout.nrm = mul(worldMatrix, float4(input.nrm, 0)).xyz;
     Myout.uvw = input.uvw;
     
     //Math goes below
     
-    Myout.pos = mul(worldMatrix, Myout.pos);
+    Myout.posW = Myout.pos = mul(worldMatrix, Myout.pos);
     Myout.pos = mul(viewMatrix, Myout.pos);
     Myout.pos = mul(projMatrix, Myout.pos);
     
