@@ -237,6 +237,8 @@ void Drawingthings::Init(HWND &hwnd)
 
 void Drawingthings::Render()
 {
+	//time(&timer);
+	//rot += 0.000000001;
 	if (GetAsyncKeyState(0x4A) && 0x8000)
 	{
 		zoom += 0.1f;
@@ -310,15 +312,24 @@ void Drawingthings::Render()
 	//projection m
 	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / zoom, aspectRatio, nearplane, farplane));
 	//light Direction
-	XMVECTOR templight = { 0, 1, 0, 1 };
-	//templight = XMVector4Transform(templight, XMLoadFloat4x4(&MyMatracies.wMatrix));
-	//templight = XMVector4Transform(templight, XMLoadFloat4x4(&MyMatracies.vMatrix));
-	//templight = XMVector4Transform(templight, XMLoadFloat4x4(&MyMatracies.pMatrix));
+	
+
+	//directional
 	MyMatracies.lights[0].lightDirection = { -1, -1, 0, 0 };
-	MyMatracies.lights[0].lightColor = { 0.75f, 0, 0, 1 };
-	XMStoreFloat4(&MyMatracies.lights[1].position, templight);
-	MyMatracies.lights[1].lightColor = { 1, 1, 1, 1 };
-	MyMatracies.lights[1].lightRadius = 10;
+	MyMatracies.lights[0].lightColor = { 1, 0, 0, 1 };
+
+	//Point
+	MyMatracies.lights[1].position = { -10, 4, 0, 1 };
+	MyMatracies.lights[1].lightColor = { 0, 1, 0, 1 };
+	MyMatracies.lights[1].lightRadius = 10 * (sinf(rot)+1);
+
+	//spot
+	MyMatracies.lights[2].position = { 0, 5, 0, 1 };
+	MyMatracies.lights[2].lightColor = { 0, 0, 1, 1 };
+	MyMatracies.lights[2].lightDirection = { 0, -1, 0, 0 };
+	MyMatracies.lights[2].cosineInnerCone = .8f;
+	MyMatracies.lights[2].cosineOuterCone = .4f;
+
 
 //	MyMatracies.lights[0]. = { 1, 1, 1, 1 };
 

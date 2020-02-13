@@ -37,5 +37,15 @@ float4 main(OutputVert inputPixel) : SV_TARGET
     float4 Pointlight = saturate(dot(normalize(light[1].position - inputPixel.posW).xyz, normalize(inputPixel.nrm))) * light[1].lightColor;
     float pointAttinuation = 1 - saturate(length(light[1].position - inputPixel.posW) / light[1].lightRadius);
     Pointlight *= pointAttinuation;
-    return finalColor * saturate( Pointlight + Dirlight);
+    
+    float4 SpotlightDir = normalize(light[2].position - inputPixel.posW);
+    float SurfaceRatio = saturate(dot(-SpotlightDir, light[2].lightDirection));
+    float spotfactor = (SurfaceRatio > light[2].cosineOuterCone) ? 1 : 0;
+    float spotLightRatio = saturate(dot(SpotlightDir, normalize(inputPixel.nrm)));
+    float4 SpotColor = spotfactor * spotLightRatio * light[2].lightColor;
+    
+    float SpotAtten = 1 - saturate((light[2].cosineInnerCone- SurfaceRatio) / (light[2].cosineInnerCone - light[2].cosineOuterCone));
+    SpotColor *= SpotAtten;
+    
+    return finalColor * saturate( Pointlight + Dirlight + SpotColor);
 }

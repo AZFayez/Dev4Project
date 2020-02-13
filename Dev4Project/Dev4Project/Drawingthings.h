@@ -14,6 +14,8 @@
 #include "Assets/StoneHenge.h"
 #include "DDSTextureLoader.h"
 #include "CameraControl.h"
+#include <ctime>
+#include <time.h>
 
 using namespace DirectX;
 using namespace std;
@@ -67,6 +69,7 @@ private:
 	float						farplane = 1000;
 	float						nearplane = 0.1f;
 	CameraControl				camera;
+	time_t						timer;
 	
 	ID3D11Device				*myDevice = nullptr;
 	IDXGISwapChain				*mySwapper = nullptr;
