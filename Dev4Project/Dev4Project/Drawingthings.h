@@ -61,6 +61,8 @@ private:
 		vector<int> indicesList;
 	}simpleMesh;
 
+	SimpleMesh simplecube;
+
 	void LoadMesh(const char* meshFileName, SimpleMesh& mesh);
 	// Math
 	unsigned int				numverts = 0;
@@ -84,6 +86,8 @@ private:
 	ID3D11Buffer				*iBuffMesh = nullptr;
 	ID3D11Buffer				*vBuffCMesh = nullptr;
 	ID3D11Buffer				*iBuffCMesh = nullptr;
+	ID3D11Buffer				*vBuffCube = nullptr;
+	ID3D11Buffer				*iBuffCube = nullptr;
 	ID3D11VertexShader			*vShader = nullptr;
 	ID3D11PixelShader			*pShader = nullptr;
 	ID3D11VertexShader			*vMeshShader = nullptr;
@@ -91,6 +95,8 @@ private:
 	ID3D11VertexShader			*ComplexvMeshShader = nullptr;
 	ID3D11PixelShader			*ComplexpMeshShader = nullptr;
 	ID3D11Texture2D				*zBuffer = nullptr;
+	ID3D11Texture3D				*Skybox = nullptr;
+	ID3D11ShaderResourceView	*SkyboxTexture = nullptr;
 	ID3D11DepthStencilView		*zBufferView = nullptr;
 	ID3D11ShaderResourceView	*meshTexture = nullptr;
 	ID3D11ShaderResourceView	*CmeshTexture = nullptr;

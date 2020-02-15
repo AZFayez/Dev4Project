@@ -56,7 +56,7 @@ vector<XMFLOAT2> LoadUVInformation(FbxMesh* pMesh);
 int main()
 {
     // Change the following filename to a suitable filename value.
-    const char* lFilename = "../Assets/Axe.fbx";
+    const char* lFilename = "../Assets/cube.fbx";
 
     // Initialize the SDK manager. This object handles memory management.
     FbxManager* lSdkManager = FbxManager::Create();
@@ -85,7 +85,7 @@ int main()
     lImporter->Destroy();
 
     ProcessFbxMesh(lScene->GetRootNode());
-    SaveMesh("../Assets/Axe.mesh", simpleMesh);
+    SaveMesh("../Assets/cube.mesh", simpleMesh);
 }
 
 void ProcessFbxMesh(FbxNode* Node)

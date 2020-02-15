@@ -62,7 +62,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (msg.message == WM_QUIT)
             break;
 
-        artist.rot += 0.1f;
+        artist.rot += 0.05f;
         artist.CameraMove();
         artist.Render();
     }

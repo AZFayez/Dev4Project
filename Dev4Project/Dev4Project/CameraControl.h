@@ -10,7 +10,7 @@ public:
 	CameraControl();
 	~CameraControl();
 	XMFLOAT4X4 getView();
-	XMVECTOR displacement;
+	XMFLOAT4X4 getPosition();
 	void RotateY(float deg);
 	void RotateX(float deg);
 	void TranslateUP(float x, float y, float z);

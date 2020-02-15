@@ -2,7 +2,6 @@
 
 CameraControl::CameraControl()
 {
-	displacement =XMVectorZero();
 	translateX = 0;
 	translateY = 4;
 	translateZ = -10;
@@ -64,4 +63,11 @@ void CameraControl::Movement()
 		RotateY(-0.01f);
 	if (GetAsyncKeyState(VK_RIGHT) && 0x8000)
 		RotateY(0.01);
+}
+
+XMFLOAT4X4 CameraControl::getPosition()
+{
+	XMFLOAT4X4 temp;
+	XMStoreFloat4x4(&temp, View);
+	return temp;
 }
