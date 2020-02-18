@@ -33,6 +33,10 @@ float4 main(OutputVert inputPixel) : SV_TARGET
 {
     float4 finalColor = 0;
     finalColor = txDiffuse.Sample(samLinear,inputPixel.uvw.xy);
+    
+    if (finalColor.a < 0.2)
+        discard;
+    
     float4 Dirlight = saturate(dot(-normalize(light[0].lightDirection.xyz), normalize(inputPixel.nrm))) * light[0].lightColor;
     float4 Pointlight = saturate(dot(normalize(light[1].position - inputPixel.posW).xyz, normalize(inputPixel.nrm))) * light[1].lightColor;
     float pointAttinuation = 1 - saturate(length(light[1].position - inputPixel.posW) / light[1].lightRadius);

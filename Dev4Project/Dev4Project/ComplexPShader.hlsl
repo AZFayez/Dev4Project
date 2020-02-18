@@ -32,7 +32,12 @@ cbuffer SHADER_VAR : register(b0)
 float4 main(PS_INPUT inputPixel) : SV_TARGET
 {
     float4 finalColor = 0;
+    
     finalColor = txDiffuse.Sample(samLinear, inputPixel.Tex);
+    
+    if (finalColor.a < 0.2)
+        discard;
+    
     float4 Dirlight = saturate(dot(-normalize(light[0].lightDirection.xyz), normalize(inputPixel.Norm))) * light[0].lightColor;
     float4 Pointlight = saturate(dot(normalize(light[1].position.xyz - inputPixel.Tex3D).xyz, normalize(inputPixel.Norm))) * light[1].lightColor;
     float pointAttinuation = 1 - saturate(length(light[1].position.xyz - inputPixel.Tex3D) / light[1].lightRadius);

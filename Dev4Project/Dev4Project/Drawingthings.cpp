@@ -257,7 +257,7 @@ void Drawingthings::Init(HWND& hwnd)
 
 	hr = myDevice->CreateInputLayout(ComplexMeshiDesc, 3, ComplexVertexShader, sizeof(ComplexVertexShader), &myComplexMeshLayout);
 
-	LoadMesh("./Assets/Axe.mesh", simpleMesh);
+	LoadMesh("./Assets/bamboo.mesh", simpleMesh);
 
 	ZeroMemory(&bDesc, sizeof(bDesc));
 	ZeroMemory(&subData, sizeof(subData));
@@ -282,7 +282,7 @@ void Drawingthings::Init(HWND& hwnd)
 
 	hr = myDevice->CreateBuffer(&bDesc, &subData, &iBuffCMesh);
 
-	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/axeTexture.dds", nullptr, &CmeshTexture);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/BambooT.dds", nullptr, &CmeshTexture);
 	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/SkyboxOcean.dds", (ID3D11Resource**)&Skybox, &SkyboxTexture);
 	LoadMesh("./Assets/cube.mesh", simplecube);
 
