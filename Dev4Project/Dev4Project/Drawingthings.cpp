@@ -2,6 +2,26 @@
 
 Drawingthings::Drawingthings()
 {
+	//directional
+	MyMatracies.lights[0].lightDirection = { 1, -1, 0, 0 };
+	MyMatracies.lights[0].lightColor = { 0.5f, 0.5f, 0.5f, 1 };
+
+	//Point
+	MyMatracies.lights[1].position = { -10, 3, 0, 1 };
+	MyMatracies.lights[1].lightColor = { 0, 0, 1, 1 };
+	MyMatracies.lights[1].lightRadius = 20;
+
+	//spot
+	MyMatracies.lights[2].position = { 0, 5, 0, 1 };
+	MyMatracies.lights[2].lightColor = { 1, 0, 0, 1 };
+	MyMatracies.lights[2].lightDirection = { 0, -1, 0.5f, 0 };
+	MyMatracies.lights[2].cosineInnerCone = .8f;
+	MyMatracies.lights[2].cosineOuterCone = .4f;
+
+	for (int i = 0; i < 10; i++)
+	{
+		XMStoreFloat4x4(&instancDate.position[i], XMMatrixMultiply(XMMatrixRotationZ(36 * (i + 1)), XMMatrixTranslation(i - 5, 5, 0)));
+	}
 }
 
 Drawingthings::~Drawingthings()
@@ -33,9 +53,16 @@ Drawingthings::~Drawingthings()
 	if (Skybox) Skybox->Release();
 	if (vBuffCube) vBuffCube->Release();
 	if (iBuffCube) iBuffCube->Release();
+	if (myRasterizer) myRasterizer->Release();
+	if (SkyPShader) SkyPShader->Release();
+	if (zBuffState) zBuffState->Release();
+	if (cubeSamplerState) cubeSamplerState->Release();
+	if (instanceBuff) instanceBuff->Release();
+	if (SkyVShader) SkyVShader->Release();
+	if (SkyLayout) SkyLayout->Release();
 }
 
-void Drawingthings::Init(HWND &hwnd)
+void Drawingthings::Init(HWND& hwnd)
 {
 	RECT myWinR;
 	GetClientRect(hwnd, &myWinR);
@@ -58,8 +85,8 @@ void Drawingthings::Init(HWND &hwnd)
 
 	// change d3d11 device debug to null on release
 	hr = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, D3D11_CREATE_DEVICE_DEBUG, &dx11,
-									1, D3D11_SDK_VERSION, &swap, &mySwapper, &myDevice, 0, &myContext);
-	
+		1, D3D11_SDK_VERSION, &swap, &mySwapper, &myDevice, 0, &myContext);
+
 	ID3D11Resource* backbuffer = nullptr;
 	hr = mySwapper->GetBuffer(0, __uuidof(backbuffer), (void**)&backbuffer);
 	hr = myDevice->CreateRenderTargetView(backbuffer, NULL, &myTargetv);
@@ -124,7 +151,7 @@ void Drawingthings::Init(HWND &hwnd)
 	};
 
 	hr = myDevice->CreateInputLayout(iDesc, 2, MyVertx, sizeof(MyVertx), &myLayout);
-	
+
 	//create constant buffer
 	ZeroMemory(&bDesc, sizeof(bDesc));
 	ZeroMemory(&subData, sizeof(subData));
@@ -162,7 +189,7 @@ void Drawingthings::Init(HWND &hwnd)
 	hr = myDevice->CreateBuffer(&bDesc, &subData, &iBuffMesh);
 
 	//load new mesh shader
-	
+
 	hr = myDevice->CreateVertexShader(MyVMeshShader, sizeof(MyVMeshShader), nullptr, &vMeshShader);
 	myDevice->CreatePixelShader(MYPMeshShader, sizeof(MYPMeshShader), nullptr, &pMeshShader);
 
@@ -192,8 +219,27 @@ void Drawingthings::Init(HWND &hwnd)
 
 	hr = myDevice->CreateTexture2D(&zDesc, nullptr, &zBuffer);
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC dDesc;
-	ZeroMemory(&dDesc, sizeof(dDesc));
+	D3D11_DEPTH_STENCIL_DESC dDesc;
+	ZeroMemory(&dDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+	dDesc.DepthEnable = true;
+	dDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+	dDesc.StencilEnable = false;
+	dDesc.StencilReadMask = 0xFF;
+	dDesc.StencilWriteMask = 0xFF;
+
+	dDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	dDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	dDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	dDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	dDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	dDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	dDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	dDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	hr = myDevice->CreateDepthStencilState(&dDesc, &zBuffState);
 
 	hr = myDevice->CreateDepthStencilView(zBuffer, nullptr, &zBufferView);
 
@@ -204,9 +250,9 @@ void Drawingthings::Init(HWND &hwnd)
 
 	D3D11_INPUT_ELEMENT_DESC ComplexMeshiDesc[] =
 	{
-		 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION"	, 0, DXGI_FORMAT_R32G32B32_FLOAT,	  0,  0, D3D11_INPUT_PER_VERTEX_DATA,	0 },
+		{ "NORMAL"		, 0, DXGI_FORMAT_R32G32B32_FLOAT,	  0, 12, D3D11_INPUT_PER_VERTEX_DATA,	0 },
+		{ "TEXCOORD"	, 0, DXGI_FORMAT_R32G32_FLOAT,		  0, 24, D3D11_INPUT_PER_VERTEX_DATA,	0 },
 	};
 
 	hr = myDevice->CreateInputLayout(ComplexMeshiDesc, 3, ComplexVertexShader, sizeof(ComplexVertexShader), &myComplexMeshLayout);
@@ -237,7 +283,7 @@ void Drawingthings::Init(HWND &hwnd)
 	hr = myDevice->CreateBuffer(&bDesc, &subData, &iBuffCMesh);
 
 	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/axeTexture.dds", nullptr, &CmeshTexture);
-	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/SkyboxOcean.dds", /*(ID3D11Resource**)&Skybox*/nullptr, &SkyboxTexture);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/SkyboxOcean.dds", (ID3D11Resource**)&Skybox, &SkyboxTexture);
 	LoadMesh("./Assets/cube.mesh", simplecube);
 
 	ZeroMemory(&bDesc, sizeof(bDesc));
@@ -262,12 +308,63 @@ void Drawingthings::Init(HWND &hwnd)
 	subData.pSysMem = simplecube.indicesList.data();
 
 	hr = myDevice->CreateBuffer(&bDesc, &subData, &iBuffCube);
+
+	// set raterizerstate
+	D3D11_RASTERIZER_DESC rDesc;
+	ZeroMemory(&rDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rDesc.AntialiasedLineEnable = true;
+	rDesc.CullMode = D3D11_CULL_NONE;
+	rDesc.DepthBias = 0;
+	rDesc.DepthBiasClamp = 1;
+	rDesc.DepthClipEnable = true;
+	rDesc.FillMode = D3D11_FILL_SOLID;
+	rDesc.FrontCounterClockwise = false;
+	rDesc.MultisampleEnable = true;
+	rDesc.SlopeScaledDepthBias = 0;
+
+	hr = myDevice->CreateRasterizerState(&rDesc, &myRasterizer);
+
+	hr = myDevice->CreateVertexShader(SkyboxVertex, sizeof(SkyboxVertex), nullptr, &SkyVShader);
+	hr = myDevice->CreatePixelShader(SkyShader, sizeof(SkyShader), nullptr, &SkyPShader);
+
+	D3D11_INPUT_ELEMENT_DESC SkyiDesc[] =
+	{
+		{ "POSITION"	, 0, DXGI_FORMAT_R32G32B32_FLOAT,	  0,  0, D3D11_INPUT_PER_VERTEX_DATA,	0 },
+		{ "NORMAL"		, 0, DXGI_FORMAT_R32G32B32_FLOAT,	  0, 12, D3D11_INPUT_PER_VERTEX_DATA,	0 },
+		{ "TEXCOORD"	, 0, DXGI_FORMAT_R32G32_FLOAT,		  0, 24, D3D11_INPUT_PER_VERTEX_DATA,	0 },
+	};
+
+	hr = myDevice->CreateInputLayout(SkyiDesc, 3, SkyboxVertex, sizeof(SkyboxVertex), &SkyLayout);
+
+	//instancing
+	vector<WVP> instanceMatracies;
+	XMFLOAT4X4 temp;
+	XMStoreFloat4x4(&temp, XMMatrixMultiply(XMMatrixRotationZ(180.0f), XMMatrixTranslation(1, 5, 0)));
+	//instanceMatracies.vMatrix = camera.getView();
+
+	ZeroMemory(&bDesc, sizeof(bDesc));
+	ZeroMemory(&subData, sizeof(subData));
+
+	bDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bDesc.ByteWidth = sizeof(instance);
+	bDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bDesc.MiscFlags = 0;
+	bDesc.StructureByteStride = 0;
+	bDesc.Usage = D3D11_USAGE_DYNAMIC;
+
+	subData.pSysMem = &instancDate;
+
+	hr = myDevice->CreateBuffer(&bDesc, &subData, &instanceBuff);
 }
 
 void Drawingthings::Render()
 {
-	//time(&timer);
-	//rot += 0.000000001;
+
+	MyMatracies.lights[1].position.z = 10 * (sinf(rot));
+
+	XMVECTOR Spotlighttemp = XMLoadFloat4(&MyMatracies.lights[2].lightDirection);
+	XMStoreFloat4(&MyMatracies.lights[2].lightDirection, XMVector4Transform(Spotlighttemp, XMMatrixRotationY(-0.01f)));
+
 	if (GetAsyncKeyState(0x4A) && 0x8000)
 	{
 		zoom += 0.1f;
@@ -304,36 +401,33 @@ void Drawingthings::Render()
 		if (farplane <= (nearplane + 1))
 			farplane = nearplane + 1;
 	}
+	if (GetAsyncKeyState(VK_LEFT) && 0x8000)
+	{
+		XMVECTOR lighttemp = XMLoadFloat4(&MyMatracies.lights[0].lightDirection);
+		XMStoreFloat4(&MyMatracies.lights[0].lightDirection, XMVector4Transform(lighttemp, XMMatrixRotationY(-0.01f)));
+	}
+	if (GetAsyncKeyState(VK_RIGHT) && 0x8000)
+	{
+		XMVECTOR lighttemp = XMLoadFloat4(&MyMatracies.lights[0].lightDirection);
+		XMStoreFloat4(&MyMatracies.lights[0].lightDirection, XMVector4Transform(lighttemp, XMMatrixRotationY(0.01f)));
+	}
+
 	aspectRatio = swap.BufferDesc.Width / static_cast<float>(swap.BufferDesc.Height);
 	float color[] = { 0, 1, 1, 1 };
-	myContext->ClearRenderTargetView(myTargetv, color);
-
-	//myContext->PSSetShaderResources(0, 1, &SkyboxTexture);
-
-	// setup the pipeline)
-
 	// output merger
 	ID3D11RenderTargetView* tempRTv[] = { myTargetv };
 	myContext->OMSetRenderTargets(1, tempRTv, zBufferView);
-
+	myContext->ClearRenderTargetView(myTargetv, color);
 	//clear z buffer
 	myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
-
+	// setup the pipeline)
+	myContext->RSSetState(myRasterizer);
 	// rasterizer
 	myContext->RSSetViewports(1, &myPort);
 
-	// Input Assembler
-	myContext->IASetInputLayout(myLayout);
-	UINT strides[] = { sizeof(MyVertex) };
-	UINT offsets[] = { 0 };
-	ID3D11Buffer* tempVB[] = { vBuff };
-	myContext->IASetVertexBuffers(0, 1, tempVB, strides, offsets);
-	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//myContext->PSSetShaderResources(0, 1, &SkyboxTexture);
 
-	// vertex shader
-	myContext->VSSetShader(vShader, 0, 0);
-	// pixel shader
-	myContext->PSSetShader(pShader, 0, 0);
+	// Input Assembler
 
 	//world m
 	XMMATRIX temp = XMMatrixTranslation(3, 2, -5);
@@ -343,39 +437,64 @@ void Drawingthings::Render()
 	//projection m
 	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / zoom, aspectRatio, nearplane, farplane));
 	//light Direction
-	
-
-	//directional
-	MyMatracies.lights[0].lightDirection = { -1, -1, 0, 0 };
-	MyMatracies.lights[0].lightColor = { 1, 0, 0, 1 };
-
-	//Point
-	MyMatracies.lights[1].position = { -10, 4, 0, 1 };
-	MyMatracies.lights[1].lightColor = { 0, 1, 0, 1 };
-	MyMatracies.lights[1].lightRadius = 10 * (sinf(rot)+1);
-
-	//spot
-	MyMatracies.lights[2].position = { 0, 5, 0, 1 };
-	MyMatracies.lights[2].lightColor = { 0, 0, 1, 1 };
-	MyMatracies.lights[2].lightDirection = { 0, -1, 0, 0 };
-	MyMatracies.lights[2].cosineInnerCone = .8f;
-	MyMatracies.lights[2].cosineOuterCone = .4f;
 
 
 //	MyMatracies.lights[0]. = { 1, 1, 1, 1 };
 
 	//upload matracies to video card
 	D3D11_MAPPED_SUBRESOURCE gpuBuff;
+	D3D11_MAPPED_SUBRESOURCE gpuInBuff;
 	HRESULT hr =  myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
 
-	//connect constant buff to pipeline
-	ID3D11Buffer* constants[] = { cBuff };
-	myContext->VSSetConstantBuffers(0, 1, constants);
+	hr = myContext->Map(instanceBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuInBuff);
+	memcpy(gpuInBuff.pData, &instancDate, sizeof(instance));
+	myContext->Unmap(instanceBuff, 0);
 
-	// draw
-	myContext->Draw(numverts, 0);
+	//connect constant buff to pipeline
+	ID3D11Buffer* constants[] = { cBuff, instanceBuff };
+	myContext->VSSetConstantBuffers(0, 2, constants);
+	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	UINT Cmesh_strides[] = { sizeof(SimpleVertex) };
+	UINT Cmesh_offsets[] = { 0 };
+
+	myContext->IASetInputLayout(SkyLayout);
+	myContext->IASetVertexBuffers(0, 1, &vBuffCube, Cmesh_strides, Cmesh_offsets);
+	myContext->IASetIndexBuffer(iBuffCube, DXGI_FORMAT_R32_UINT, 0);
+	myContext->VSSetShader(SkyVShader, 0, 0);
+	myContext->PSSetShader(SkyPShader, 0, 0);
+	myContext->PSSetShaderResources(0, 1, &SkyboxTexture);
+	MyMatracies.wMatrix = camera.getPosition();
+	//XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0,5,0));
+	//upload new matrix to video card
+	hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+	myContext->Unmap(cBuff, 0);
+
+	myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
+	myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
+
+
+	//XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixMultiply(XMMatrixRotationY(rot), temp));
+	//hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+	//memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+	//myContext->Unmap(cBuff, 0);
+
+	//myContext->IASetInputLayout(myLayout);
+	//UINT strides[] = { sizeof(MyVertex) };
+	//UINT offsets[] = { 0 };
+	//ID3D11Buffer* tempVB[] = { vBuff };
+	//myContext->IASetVertexBuffers(0, 1, tempVB, strides, offsets);
+
+	//// vertex shader
+	//myContext->VSSetShader(vShader, 0, 0);
+	//// pixel shader
+	//myContext->PSSetShader(pShader, 0, 0);
+
+	//// draw
+	//myContext->Draw(numverts, 0);
 
 
 	//drawing second item
@@ -401,10 +520,11 @@ void Drawingthings::Render()
 	myContext->DrawIndexed(2532, 0, 0);
 
 	myContext->IASetInputLayout(myComplexMeshLayout);
-	UINT Cmesh_strides[] = { sizeof(SimpleVertex) };
-	UINT Cmesh_offsets[] = { 0 };
+	
+	UINT Instance_strides[] = { sizeof(SimpleVertex), sizeof(instance) };
+	UINT Instance_offsets[] = { 0 };
 	ID3D11Buffer* CmeshVB[] = { vBuffCMesh };
-	myContext->IASetVertexBuffers(0, 1, CmeshVB, Cmesh_strides, Cmesh_offsets);
+	myContext->IASetVertexBuffers(0, 1, CmeshVB, Instance_strides, Instance_offsets);
 	myContext->IASetIndexBuffer(iBuffCMesh, DXGI_FORMAT_R32_UINT, 0);
 	myContext->VSSetShader(ComplexvMeshShader, 0, 0);
 	myContext->PSSetShader(ComplexpMeshShader, 0, 0);
@@ -416,23 +536,23 @@ void Drawingthings::Render()
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
 
-	myContext->DrawIndexed(simpleMesh.indicesList.size(), 0, 0);
+	//myContext->DrawIndexed(simpleMesh.indicesList.size(), 0, 0);
+	myContext->DrawIndexedInstanced(simpleMesh.indicesList.size(), 10, 0, 0, 0);
 
 	//Draw cube
 
-	myContext->IASetVertexBuffers(0, 1, &vBuffCube, Cmesh_strides, Cmesh_offsets);
-	myContext->IASetIndexBuffer(iBuffCube, DXGI_FORMAT_R32_UINT, 0);
-	myContext->VSSetShader(ComplexvMeshShader, 0, 0);
-	myContext->PSSetShader(ComplexpMeshShader, 0, 0);
-	//myContext->PSSetShaderResources(0, 1, &SkyboxTexture);
-	MyMatracies.wMatrix = camera.getPosition();
-	//XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0, 5, 0));
-	//upload new matrix to video card
-	hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
-	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
-	myContext->Unmap(cBuff, 0);
+	//myContext->IASetVertexBuffers(0, 1, &vBuffCube, Cmesh_strides, Cmesh_offsets);
+	//myContext->IASetIndexBuffer(iBuffCube, DXGI_FORMAT_R32_UINT, 0);
+	//myContext->VSSetShader(ComplexvMeshShader, 0, 0);
+	//myContext->PSSetShader(SkyPShader, 0, 0);
+	////myContext->PSSetShaderResources(0, 1, &SkyboxTexture);
+	//MyMatracies.wMatrix = camera.getPosition();
+	////upload new matrix to video card
+	//hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+	//memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+	//myContext->Unmap(cBuff, 0);
 
-	myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
+	//myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
 
 	mySwapper->Present(1, 0);
 }

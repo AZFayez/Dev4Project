@@ -11,6 +11,8 @@
 #include "MyPMeshShader.h"
 #include "ComplexVertexShader.h"
 #include "ComplexPShader.h"
+#include "SkyShader.h"
+#include "SkyboxVertex.h"
 #include "Assets/StoneHenge.h"
 #include "DDSTextureLoader.h"
 #include "CameraControl.h"
@@ -63,6 +65,11 @@ private:
 
 	SimpleMesh simplecube;
 
+	struct instance
+	{
+		XMFLOAT4X4 position[10];
+	}instancDate;
+
 	void LoadMesh(const char* meshFileName, SimpleMesh& mesh);
 	// Math
 	unsigned int				numverts = 0;
@@ -80,6 +87,7 @@ private:
 	ID3D11InputLayout			*myLayout = nullptr;
 	ID3D11InputLayout			*myMeshLayout = nullptr;
 	ID3D11InputLayout			*myComplexMeshLayout = nullptr;
+	ID3D11InputLayout			*SkyLayout = nullptr;
 	ID3D11Buffer				*vBuff = nullptr;
 	ID3D11Buffer				*cBuff = nullptr;
 	ID3D11Buffer				*vBuffMesh = nullptr;
@@ -88,18 +96,24 @@ private:
 	ID3D11Buffer				*iBuffCMesh = nullptr;
 	ID3D11Buffer				*vBuffCube = nullptr;
 	ID3D11Buffer				*iBuffCube = nullptr;
+	ID3D11Buffer				*instanceBuff = nullptr;
 	ID3D11VertexShader			*vShader = nullptr;
 	ID3D11PixelShader			*pShader = nullptr;
 	ID3D11VertexShader			*vMeshShader = nullptr;
 	ID3D11PixelShader			*pMeshShader = nullptr;
 	ID3D11VertexShader			*ComplexvMeshShader = nullptr;
 	ID3D11PixelShader			*ComplexpMeshShader = nullptr;
+	ID3D11VertexShader			*SkyVShader = nullptr;
+	ID3D11PixelShader			*SkyPShader = nullptr;
 	ID3D11Texture2D				*zBuffer = nullptr;
 	ID3D11Texture3D				*Skybox = nullptr;
+	ID3D11SamplerState			*cubeSamplerState = nullptr;
 	ID3D11ShaderResourceView	*SkyboxTexture = nullptr;
 	ID3D11DepthStencilView		*zBufferView = nullptr;
 	ID3D11ShaderResourceView	*meshTexture = nullptr;
 	ID3D11ShaderResourceView	*CmeshTexture = nullptr;
+	ID3D11RasterizerState		*myRasterizer = nullptr;
+	ID3D11DepthStencilState		*zBuffState = nullptr;
 	CD3D11_VIEWPORT				myPort;
 	D3D_FEATURE_LEVEL			dx11;
 	DXGI_SWAP_CHAIN_DESC		swap;

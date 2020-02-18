@@ -68,6 +68,7 @@ void CameraControl::Movement()
 XMFLOAT4X4 CameraControl::getPosition()
 {
 	XMFLOAT4X4 temp;
-	XMStoreFloat4x4(&temp, View);
+	XMStoreFloat4x4(&temp, XMMatrixMultiply(XMMatrixTranslation(0, -0.75, 0), View));
+	//XMStoreFloat4x4(&temp, View);
 	return temp;
 }

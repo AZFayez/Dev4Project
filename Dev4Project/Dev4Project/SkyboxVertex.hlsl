@@ -1,6 +1,6 @@
 struct VS_INPUT
 {
-    float3 Pos : POSITION;
+    float4 Pos : POSITION;
     float3 Norm : NORMAL;
     float2 Tex : TEXCOORD;
 };
@@ -32,23 +32,18 @@ cbuffer SHADER_VAR : register(b0)
     Lights light[3];
 };
 
-cbuffer INSTANCE : register(b1)
+PS_INPUT main(VS_INPUT input)
 {
-    float4x4 worldMat[10];
-}
-
-PS_INPUT main(VS_INPUT input, uint id : SV_InstanceID) // uint id : SV_InstanceID
-{
-    PS_INPUT output = (PS_INPUT)0;
+    PS_INPUT output = (PS_INPUT) 0;
     
-    output.Pos = float4(input.Pos, 1);
-    output.Norm = mul(worldMat[id], float4(input.Norm, 0)).xyz;  // mul(worldMat[id], input.normal)
+    output.Pos = float4(input.Pos.xyz, 1);
+    output.Norm = mul(float4(input.Norm, 0), worldMatrix).xyz;
     output.Tex = input.Tex;
     output.Tex3D = input.Pos;
     
-    output.Pos = mul(worldMat[id], output.Pos);
+    output.Pos = mul(worldMatrix, output.Pos);
     output.Pos = mul(viewMatrix, output.Pos);
     output.Pos = mul(projMatrix, output.Pos);
     
-	return output;
+    return output;
 }
