@@ -170,6 +170,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+    case WM_SIZE:
+        RECT cRect;
+        GetClientRect(hWnd, &cRect);
+        artist.Resize(cRect.right- cRect.left, cRect.bottom - cRect.top);
+        break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }

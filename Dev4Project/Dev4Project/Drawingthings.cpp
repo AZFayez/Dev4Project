@@ -2,6 +2,7 @@
 
 Drawingthings::Drawingthings()
 {
+	CurrScene = STUPID;
 	//directional
 	MyMatracies.lights[0].lightDirection = { 1, -1, 0, 0 };
 	MyMatracies.lights[0].lightColor = { 0.5f, 0.5f, 0.5f, 1 };
@@ -49,7 +50,7 @@ Drawingthings::~Drawingthings()
 	if (ComplexpMeshShader) ComplexpMeshShader->Release();
 	if (myComplexMeshLayout) myComplexMeshLayout->Release();
 	if (CmeshTexture) CmeshTexture->Release();
-	if (SkyboxTexture) SkyboxTexture->Release();
+	if (SkyboxTextureDefault) SkyboxTextureDefault->Release();
 	if (Skybox) Skybox->Release();
 	if (vBuffCube) vBuffCube->Release();
 	if (iBuffCube) iBuffCube->Release();
@@ -60,6 +61,15 @@ Drawingthings::~Drawingthings()
 	if (instanceBuff) instanceBuff->Release();
 	if (SkyVShader) SkyVShader->Release();
 	if (SkyLayout) SkyLayout->Release();
+	if (mySampler) mySampler->Release();
+	if (SkyboxTextureIsland) SkyboxTextureIsland->Release();
+	if (SkyboxTextureSpace) SkyboxTextureSpace->Release();
+	if (vPlanetMesh) vPlanetMesh->Release();
+	if (iPlanetMesh) iPlanetMesh->Release();
+	if (PlanetTexture) PlanetTexture->Release();
+	if (PlanetHeight) PlanetHeight->Release();
+	if (PlanetVShader) PlanetVShader->Release();
+	if (PlanetPShader) PlanetPShader->Release();
 }
 
 void Drawingthings::Init(HWND& hwnd)
@@ -204,6 +214,8 @@ void Drawingthings::Init(HWND& hwnd)
 
 	hr = myDevice->CreateInputLayout(MeshiDesc, 3, MyVMeshShader, sizeof(MyVMeshShader), &myMeshLayout);
 
+#pragma region z Buffer
+
 	// making a z buffer
 	D3D11_TEXTURE2D_DESC zDesc;
 	ZeroMemory(&zDesc, sizeof(zDesc));
@@ -243,6 +255,8 @@ void Drawingthings::Init(HWND& hwnd)
 
 	hr = myDevice->CreateDepthStencilView(zBuffer, nullptr, &zBufferView);
 
+#pragma endregion
+
 	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/StoneHenge.dds", nullptr, &meshTexture);
 
 	hr = myDevice->CreateVertexShader(ComplexVertexShader, sizeof(ComplexVertexShader), nullptr, &ComplexvMeshShader);
@@ -257,57 +271,15 @@ void Drawingthings::Init(HWND& hwnd)
 
 	hr = myDevice->CreateInputLayout(ComplexMeshiDesc, 3, ComplexVertexShader, sizeof(ComplexVertexShader), &myComplexMeshLayout);
 
-	LoadMesh("./Assets/bamboo.mesh", simpleMesh);
+	CreateModel(simpleMesh, "./Assets/Axe.mesh", &vBuffCMesh, &iBuffCMesh);
+	
 
-	ZeroMemory(&bDesc, sizeof(bDesc));
-	ZeroMemory(&subData, sizeof(subData));
-
-	bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bDesc.ByteWidth = sizeof(SimpleVertex) * simpleMesh.vertexList.size();
-	bDesc.CPUAccessFlags = 0;
-	bDesc.MiscFlags = 0;
-	bDesc.StructureByteStride = 0;
-	bDesc.Usage = D3D11_USAGE_IMMUTABLE;
-
-	subData.pSysMem = simpleMesh.vertexList.data();
-
-	hr = myDevice->CreateBuffer(&bDesc, &subData, &vBuffCMesh); // vertex buffer
-
-	//index buffer
-	ZeroMemory(&subData, sizeof(subData));
-
-	bDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bDesc.ByteWidth = sizeof(int) * simpleMesh.indicesList.size();
-	subData.pSysMem = simpleMesh.indicesList.data();
-
-	hr = myDevice->CreateBuffer(&bDesc, &subData, &iBuffCMesh);
-
-	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/BambooT.dds", nullptr, &CmeshTexture);
-	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/SkyboxOcean.dds", (ID3D11Resource**)&Skybox, &SkyboxTexture);
-	LoadMesh("./Assets/cube.mesh", simplecube);
-
-	ZeroMemory(&bDesc, sizeof(bDesc));
-	ZeroMemory(&subData, sizeof(subData));
-
-	bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bDesc.ByteWidth = sizeof(SimpleVertex) * simplecube.vertexList.size();
-	bDesc.CPUAccessFlags = 0;
-	bDesc.MiscFlags = 0;
-	bDesc.StructureByteStride = 0;
-	bDesc.Usage = D3D11_USAGE_IMMUTABLE;
-
-	subData.pSysMem = simplecube.vertexList.data();
-
-	hr = myDevice->CreateBuffer(&bDesc, &subData, &vBuffCube); // vertex buffer
-
-	//index buffer
-	ZeroMemory(&subData, sizeof(subData));
-
-	bDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bDesc.ByteWidth = sizeof(int) * simplecube.indicesList.size();
-	subData.pSysMem = simplecube.indicesList.data();
-
-	hr = myDevice->CreateBuffer(&bDesc, &subData, &iBuffCube);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/axeTexture.dds", nullptr, &CmeshTexture);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/SunsetSkybox.dds", (ID3D11Resource**)&Skybox, &SkyboxTextureDefault);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/SkyboxOcean.dds", nullptr, &SkyboxTextureIsland);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/Space.dds", nullptr, &SkyboxTextureSpace);
+	
+	CreateModel(simplecube, "./Assets/cube.mesh", &vBuffCube, &iBuffCube);
 
 	// set raterizerstate
 	D3D11_RASTERIZER_DESC rDesc;
@@ -355,6 +327,24 @@ void Drawingthings::Init(HWND& hwnd)
 	subData.pSysMem = &instancDate;
 
 	hr = myDevice->CreateBuffer(&bDesc, &subData, &instanceBuff);
+
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(D3D11_SAMPLER_DESC));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = myDevice->CreateSamplerState(&sampDesc, &mySampler);
+
+	CreateModel(Planet, "./Assets/planet1.mesh", &vPlanetMesh, &iPlanetMesh);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/planet1T.dds", nullptr, &PlanetTexture);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/planet1Height.dds", nullptr, &PlanetHeight);
+
+	myDevice->CreateVertexShader(PlanetShader, sizeof(PlanetShader), nullptr, &PlanetVShader);
+	myDevice->CreatePixelShader(PlanetPixelShader, sizeof(PlanetPixelShader), nullptr, &PlanetPShader);
 }
 
 void Drawingthings::Render()
@@ -364,6 +354,7 @@ void Drawingthings::Render()
 
 	XMVECTOR Spotlighttemp = XMLoadFloat4(&MyMatracies.lights[2].lightDirection);
 	XMStoreFloat4(&MyMatracies.lights[2].lightDirection, XMVector4Transform(Spotlighttemp, XMMatrixRotationY(-0.01f)));
+#pragma region controls
 
 	if (GetAsyncKeyState(0x4A) && 0x8000)
 	{
@@ -411,8 +402,22 @@ void Drawingthings::Render()
 		XMVECTOR lighttemp = XMLoadFloat4(&MyMatracies.lights[0].lightDirection);
 		XMStoreFloat4(&MyMatracies.lights[0].lightDirection, XMVector4Transform(lighttemp, XMMatrixRotationY(0.01f)));
 	}
+	if (GetAsyncKeyState(0x31) && 0x8000)
+	{
+		CurrScene = STUPID;
+	}
+	if (GetAsyncKeyState(0x32) && 0x8000)
+	{
+		CurrScene = ISLAND;
+	}
+	if (GetAsyncKeyState(0x33) && 0x8000)
+	{
+		CurrScene = SPACE;
+	}
+#pragma endregion
 
-	aspectRatio = swap.BufferDesc.Width / static_cast<float>(swap.BufferDesc.Height);
+#pragma region Initial setup
+
 	float color[] = { 0, 1, 1, 1 };
 	// output merger
 	ID3D11RenderTargetView* tempRTv[] = { myTargetv };
@@ -424,8 +429,20 @@ void Drawingthings::Render()
 	myContext->RSSetState(myRasterizer);
 	// rasterizer
 	myContext->RSSetViewports(1, &myPort);
+	// sampler
+	myContext->PSSetSamplers(0, 1, &mySampler);
 
-	//myContext->PSSetShaderResources(0, 1, &SkyboxTexture);
+	UINT mesh_strides[] = { sizeof(_OBJ_VERT_) };
+	UINT mesh_offsets[] = { 0 };
+	ID3D11Buffer* meshVB[] = { vBuffMesh };
+
+	UINT Instance_strides[] = { sizeof(SimpleVertex), sizeof(instance) };
+	UINT Instance_offsets[] = { 0 };
+	ID3D11Buffer* CmeshVB[] = { vBuffCMesh };
+
+#pragma endregion
+
+#pragma region InputAssembler
 
 	// Input Assembler
 
@@ -436,10 +453,7 @@ void Drawingthings::Render()
 	MyMatracies.vMatrix = camera.getView();
 	//projection m
 	XMStoreFloat4x4(&MyMatracies.pMatrix, XMMatrixPerspectiveFovLH(3.14f / zoom, aspectRatio, nearplane, farplane));
-	//light Direction
 
-
-//	MyMatracies.lights[0]. = { 1, 1, 1, 1 };
 
 	//upload matracies to video card
 	D3D11_MAPPED_SUBRESOURCE gpuBuff;
@@ -457,6 +471,10 @@ void Drawingthings::Render()
 	myContext->VSSetConstantBuffers(0, 2, constants);
 	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+#pragma endregion
+
+#pragma region SkyBox
+
 	UINT Cmesh_strides[] = { sizeof(SimpleVertex) };
 	UINT Cmesh_offsets[] = { 0 };
 
@@ -465,43 +483,27 @@ void Drawingthings::Render()
 	myContext->IASetIndexBuffer(iBuffCube, DXGI_FORMAT_R32_UINT, 0);
 	myContext->VSSetShader(SkyVShader, 0, 0);
 	myContext->PSSetShader(SkyPShader, 0, 0);
-	myContext->PSSetShaderResources(0, 1, &SkyboxTexture);
 	MyMatracies.wMatrix = camera.getPosition();
-	//XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0,5,0));
-	//upload new matrix to video card
 	hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
 
-	myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
-	myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
 
+#pragma endregion
 
-	//XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixMultiply(XMMatrixRotationY(rot), temp));
-	//hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
-	//memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
-	//myContext->Unmap(cBuff, 0);
-
-	//myContext->IASetInputLayout(myLayout);
-	//UINT strides[] = { sizeof(MyVertex) };
-	//UINT offsets[] = { 0 };
-	//ID3D11Buffer* tempVB[] = { vBuff };
-	//myContext->IASetVertexBuffers(0, 1, tempVB, strides, offsets);
-
-	//// vertex shader
-	//myContext->VSSetShader(vShader, 0, 0);
-	//// pixel shader
-	//myContext->PSSetShader(pShader, 0, 0);
-
-	//// draw
-	//myContext->Draw(numverts, 0);
-
+	switch (CurrScene)
+	{
+	case Drawingthings::STUPID:
+		myContext->PSSetShaderResources(0, 1, &SkyboxTextureDefault);
+		myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
+		myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
+#pragma region StoneHenge
 
 	//drawing second item
 	myContext->IASetInputLayout(myMeshLayout);
-	UINT mesh_strides[] = { sizeof(_OBJ_VERT_) };
-	UINT mesh_offsets[] = { 0 };
-	ID3D11Buffer* meshVB[] = { vBuffMesh };
+	//UINT mesh_strides[] = { sizeof(_OBJ_VERT_) };
+	//UINT mesh_offsets[] = { 0 };
+	//ID3D11Buffer* meshVB[] = { vBuffMesh };
 
 	myContext->IASetVertexBuffers(0, 1, meshVB, mesh_strides, mesh_offsets);
 	myContext->IASetIndexBuffer(iBuffMesh, DXGI_FORMAT_R32_UINT, 0);
@@ -519,11 +521,11 @@ void Drawingthings::Render()
 
 	myContext->DrawIndexed(2532, 0, 0);
 
+#pragma endregion
+
+#pragma region Instanced
+
 	myContext->IASetInputLayout(myComplexMeshLayout);
-	
-	UINT Instance_strides[] = { sizeof(SimpleVertex), sizeof(instance) };
-	UINT Instance_offsets[] = { 0 };
-	ID3D11Buffer* CmeshVB[] = { vBuffCMesh };
 	myContext->IASetVertexBuffers(0, 1, CmeshVB, Instance_strides, Instance_offsets);
 	myContext->IASetIndexBuffer(iBuffCMesh, DXGI_FORMAT_R32_UINT, 0);
 	myContext->VSSetShader(ComplexvMeshShader, 0, 0);
@@ -536,23 +538,46 @@ void Drawingthings::Render()
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
 
-	//myContext->DrawIndexed(simpleMesh.indicesList.size(), 0, 0);
 	myContext->DrawIndexedInstanced(simpleMesh.indicesList.size(), 10, 0, 0, 0);
 
-	//Draw cube
+#pragma endregion
+		break;
+	case Drawingthings::SPACE:
+		myContext->PSSetShaderResources(0, 1, &SkyboxTextureSpace);
+		myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
+		myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
 
-	//myContext->IASetVertexBuffers(0, 1, &vBuffCube, Cmesh_strides, Cmesh_offsets);
-	//myContext->IASetIndexBuffer(iBuffCube, DXGI_FORMAT_R32_UINT, 0);
-	//myContext->VSSetShader(ComplexvMeshShader, 0, 0);
-	//myContext->PSSetShader(SkyPShader, 0, 0);
-	////myContext->PSSetShaderResources(0, 1, &SkyboxTexture);
-	//MyMatracies.wMatrix = camera.getPosition();
-	////upload new matrix to video card
-	//hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
-	//memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
-	//myContext->Unmap(cBuff, 0);
+#pragma region Planet
+		myContext->IASetInputLayout(myComplexMeshLayout);
+		myContext->IASetVertexBuffers(0, 1, &vPlanetMesh, Instance_strides, Instance_offsets);
+		myContext->IASetIndexBuffer(iPlanetMesh, DXGI_FORMAT_R32_UINT, 0);
+		myContext->VSSetShader(PlanetVShader, 0, 0);
+		myContext->VSSetShaderResources(0, 1, &PlanetHeight);
+		myContext->PSSetShader(PlanetPShader, 0, 0);
+		myContext->PSSetShaderResources(0, 1, &PlanetTexture);
 
-	//myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
+		XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixRotationZ(10));
+		//upload new matrix to video card
+		hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+		memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+		myContext->Unmap(cBuff, 0);
+
+		myContext->DrawIndexedInstanced(Planet.indicesList.size(), 10, 0, 0, 0);
+
+#pragma endregion
+
+
+		break;
+	case Drawingthings::ISLAND:
+		myContext->PSSetShaderResources(0, 1, &SkyboxTextureIsland);
+		myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
+		myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
+		break;
+	default:
+		break;
+	}
+
+
 
 	mySwapper->Present(1, 0);
 }
@@ -560,6 +585,59 @@ void Drawingthings::Render()
 void Drawingthings::CameraMove()
 {
 	camera.Movement();
+}
+
+void Drawingthings::Resize(float width, float height)
+{
+	if (!myContext)
+		return;
+
+	myContext->OMSetRenderTargets(0, 0, 0);
+
+	myTargetv->Release();
+
+	HRESULT hr;
+
+	hr = mySwapper->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+
+	ID3D11Texture2D* pBuffer;
+	hr = mySwapper->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBuffer);
+
+	hr = myDevice->CreateRenderTargetView(pBuffer, NULL,&myTargetv);
+
+	pBuffer->Release();
+
+	zBufferView->Release();
+	zBuffer->Release();
+
+	D3D11_TEXTURE2D_DESC zDesc;
+	ZeroMemory(&zDesc, sizeof(D3D11_TEXTURE2D_DESC));
+
+	zDesc.ArraySize = 1;
+	zDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	zDesc.Width = width;
+	zDesc.Height = height;
+	zDesc.Usage = D3D11_USAGE_DEFAULT;
+	zDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	zDesc.MipLevels = 1;
+	zDesc.SampleDesc.Count = 1;
+
+	hr = myDevice->CreateTexture2D(&zDesc, nullptr, &zBuffer);
+	hr = myDevice->CreateDepthStencilView(zBuffer, nullptr, &zBufferView);
+
+	//myContext->OMSetRenderTargets(1, &myTargetv, NULL);
+
+	aspectRatio = width / static_cast<float>(height);
+
+	
+	myPort.Width = width;
+	myPort.Height = height;
+	myPort.MinDepth = 0.0f;
+	myPort.MaxDepth = 1.0f;
+	myPort.TopLeftX = 0;
+	myPort.TopLeftY = 0;
+	myContext->RSSetViewports(1, &myPort);
+
 }
 
 void Drawingthings::LoadMesh(const char* meshFileName, SimpleMesh& mesh)
@@ -600,4 +678,33 @@ void Drawingthings::LoadMesh(const char* meshFileName, SimpleMesh& mesh)
 		tri[2] = temp;
 	}
 	file.close();
+}
+
+void Drawingthings::CreateModel(SimpleMesh& meshStruct, const char* modelName, ID3D11Buffer** vetrex, ID3D11Buffer** index)
+{
+	LoadMesh(modelName, meshStruct);
+	D3D11_BUFFER_DESC bDesc;
+	D3D11_SUBRESOURCE_DATA subData;
+	ZeroMemory(&bDesc, sizeof(bDesc));
+	ZeroMemory(&subData, sizeof(subData));
+
+	bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bDesc.ByteWidth = sizeof(SimpleVertex) * meshStruct.vertexList.size();
+	bDesc.CPUAccessFlags = 0;
+	bDesc.MiscFlags = 0;
+	bDesc.StructureByteStride = 0;
+	bDesc.Usage = D3D11_USAGE_IMMUTABLE;
+
+	subData.pSysMem = meshStruct.vertexList.data();
+
+	myDevice->CreateBuffer(&bDesc, &subData, vetrex); // vertex buffer
+
+	//index buffer
+	ZeroMemory(&subData, sizeof(subData));
+
+	bDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bDesc.ByteWidth = sizeof(int) * meshStruct.indicesList.size();
+	subData.pSysMem = meshStruct.indicesList.data();
+
+	myDevice->CreateBuffer(&bDesc, &subData, index);
 }
