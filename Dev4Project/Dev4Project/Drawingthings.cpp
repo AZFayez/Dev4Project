@@ -70,6 +70,15 @@ Drawingthings::~Drawingthings()
 	if (PlanetHeight) PlanetHeight->Release();
 	if (PlanetVShader) PlanetVShader->Release();
 	if (PlanetPShader) PlanetPShader->Release();
+	if (NoHeight) NoHeight->Release();
+	if (MoonTexture) MoonTexture->Release();
+	if (IcePlanet) IcePlanet->Release();
+	if (LastPlanet) LastPlanet->Release();
+	if (vShipMesh) vShipMesh->Release();
+	if (iShipMesh) iShipMesh->Release();
+	if (ShipTex) ShipTex->Release();
+	if (ShipVShader) ShipVShader->Release();
+	if (ShipPShader) ShipPShader->Release();
 }
 
 void Drawingthings::Init(HWND& hwnd)
@@ -285,7 +294,7 @@ void Drawingthings::Init(HWND& hwnd)
 	D3D11_RASTERIZER_DESC rDesc;
 	ZeroMemory(&rDesc, sizeof(D3D11_RASTERIZER_DESC));
 	rDesc.AntialiasedLineEnable = true;
-	rDesc.CullMode = D3D11_CULL_NONE;
+	rDesc.CullMode = D3D11_CULL_BACK;
 	rDesc.DepthBias = 0;
 	rDesc.DepthBiasClamp = 1;
 	rDesc.DepthClipEnable = true;
@@ -341,10 +350,23 @@ void Drawingthings::Init(HWND& hwnd)
 
 	CreateModel(Planet, "./Assets/planet1.mesh", &vPlanetMesh, &iPlanetMesh);
 	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/planet1T.dds", nullptr, &PlanetTexture);
-	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/planet1Height.dds", nullptr, &PlanetHeight);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/fireplanetbump.dds", nullptr, &PlanetHeight);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/blank.dds", nullptr, &NoHeight);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/moon.dds", nullptr, &MoonTexture);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/iceplanet.dds", nullptr, &IcePlanet);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/planet2.dds", nullptr, &LastPlanet);
 
 	myDevice->CreateVertexShader(PlanetShader, sizeof(PlanetShader), nullptr, &PlanetVShader);
 	myDevice->CreatePixelShader(PlanetPixelShader, sizeof(PlanetPixelShader), nullptr, &PlanetPShader);
+
+	CreateModel(SpaceShip, "./Assets/spaceShip.mesh", &vShipMesh, &iShipMesh);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/shipT.dds", nullptr, &ShipTex);
+
+	myDevice->CreateVertexShader(ShipVertex, sizeof(ShipVertex), nullptr, &ShipVShader);
+	myDevice->CreatePixelShader(ShipPixel, sizeof(ShipPixel), nullptr, &ShipPShader);
+	
+		
+
 }
 
 void Drawingthings::Render()
@@ -440,6 +462,9 @@ void Drawingthings::Render()
 	UINT Instance_offsets[] = { 0 };
 	ID3D11Buffer* CmeshVB[] = { vBuffCMesh };
 
+	ID3D11ShaderResourceView* HeightMaps[] = { PlanetHeight, NoHeight };
+	ID3D11ShaderResourceView* PlanetInstancingTextures[] = { PlanetTexture, MoonTexture, LastPlanet, IcePlanet };
+
 #pragma endregion
 
 #pragma region InputAssembler
@@ -461,10 +486,6 @@ void Drawingthings::Render()
 	HRESULT hr =  myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
-
-	hr = myContext->Map(instanceBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuInBuff);
-	memcpy(gpuInBuff.pData, &instancDate, sizeof(instance));
-	myContext->Unmap(instanceBuff, 0);
 
 	//connect constant buff to pipeline
 	ID3D11Buffer* constants[] = { cBuff, instanceBuff };
@@ -538,6 +559,11 @@ void Drawingthings::Render()
 	memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 	myContext->Unmap(cBuff, 0);
 
+	//instance data constant buffer
+	hr = myContext->Map(instanceBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuInBuff);
+	memcpy(gpuInBuff.pData, &instancDate, sizeof(instance));
+	myContext->Unmap(instanceBuff, 0);
+
 	myContext->DrawIndexedInstanced(simpleMesh.indicesList.size(), 10, 0, 0, 0);
 
 #pragma endregion
@@ -552,17 +578,55 @@ void Drawingthings::Render()
 		myContext->IASetVertexBuffers(0, 1, &vPlanetMesh, Instance_strides, Instance_offsets);
 		myContext->IASetIndexBuffer(iPlanetMesh, DXGI_FORMAT_R32_UINT, 0);
 		myContext->VSSetShader(PlanetVShader, 0, 0);
-		myContext->VSSetShaderResources(0, 1, &PlanetHeight);
+		myContext->VSSetShaderResources(0, 2, HeightMaps);
 		myContext->PSSetShader(PlanetPShader, 0, 0);
-		myContext->PSSetShaderResources(0, 1, &PlanetTexture);
+		myContext->PSSetShaderResources(0, 4, PlanetInstancingTextures);
 
-		XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixRotationZ(10));
-		//upload new matrix to video card
+		//placing first planet
+		XMMATRIX temp = XMMatrixMultiply(XMMatrixRotationY(rot), XMMatrixRotationZ(-10));
+		temp = XMMatrixMultiply(temp, XMMatrixTranslation(0,0,50));
+		XMStoreFloat4x4(&PlanetsData.position[0], XMMatrixMultiply(XMMatrixScaling(3, 3, 3), temp));
+
+
+		//rotating second planet around first
+		temp = XMMatrixTranslation(temp.r[3].m128_f32[0], temp.r[3].m128_f32[1], temp.r[3].m128_f32[2]);
+		temp = XMMatrixMultiply(XMMatrixRotationY(rot), temp);
+		temp = XMMatrixMultiply(XMMatrixScaling(0.75,0.75,0.75), temp);
+		temp = XMMatrixMultiply(XMMatrixTranslation(20, 0, 0), temp);
+		XMStoreFloat4x4(&PlanetsData.position[1], XMMatrixMultiply(XMMatrixRotationY(rot), temp));
+
+		//setting up third and fourth planets
+		temp = XMMatrixMultiply(XMMatrixRotationZ(rot * 1.25f),XMMatrixTranslation(0, 0, 100));
+		temp = XMMatrixMultiply(XMMatrixScaling(2, 2, 2), temp);
+		XMStoreFloat4x4(&PlanetsData.position[2], XMMatrixMultiply(XMMatrixTranslation(-50,0,0), temp));
+		XMStoreFloat4x4(&PlanetsData.position[3], XMMatrixMultiply(XMMatrixTranslation(50,0,0), temp));
+
+		//instance data constant buffer
+		hr = myContext->Map(instanceBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuInBuff);
+		memcpy(gpuInBuff.pData, &PlanetsData, sizeof(instance));
+		myContext->Unmap(instanceBuff, 0);
+
+		myContext->DrawIndexedInstanced(Planet.indicesList.size(), 4, 0, 0, 0);
+
+#pragma endregion
+
+#pragma region SpaceShip
+
+		myContext->IASetInputLayout(SkyLayout);
+		myContext->IASetVertexBuffers(0, 1, &vShipMesh, Cmesh_strides, Cmesh_offsets);
+		myContext->IASetIndexBuffer(iShipMesh, DXGI_FORMAT_R32_UINT, 0);
+		myContext->VSSetShader(ShipVShader, 0, 0);
+		myContext->PSSetShader(ShipPShader, 0, 0);
+		myContext->PSSetShaderResources(0, 1, &ShipTex);
+
+		//MyMatracies.wMatrix = camera.getPosition();
+		//XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixMultiply(XMMatrixTranslation(0, -5, 0), XMLoadFloat4x4(&camera.getPosition())));
+		XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixIdentity());
 		hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
 		memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 		myContext->Unmap(cBuff, 0);
 
-		myContext->DrawIndexedInstanced(Planet.indicesList.size(), 10, 0, 0, 0);
+		myContext->DrawIndexed(SpaceShip.indicesList.size(), 0, 0);
 
 #pragma endregion
 

@@ -15,6 +15,8 @@
 #include "SkyboxVertex.h"
 #include "PlanetPixelShader.h"
 #include "PlanetShader.h"
+#include "ShipVertex.h"
+#include "ShipPixel.h"
 #include "Assets/StoneHenge.h"
 #include "DDSTextureLoader.h"
 #include "CameraControl.h"
@@ -68,11 +70,15 @@ private:
 
 	SimpleMesh simplecube;
 	SimpleMesh Planet;
+	SimpleMesh SpaceShip;
 
 	struct instance
 	{
 		XMFLOAT4X4 position[10];
+
 	}instancDate;
+
+	instance PlanetsData;
 
 	void CreateModel(SimpleMesh& meshStruct, const char* modelName, ID3D11Buffer** vetrex, ID3D11Buffer** index);
 
@@ -111,6 +117,8 @@ private:
 	ID3D11Buffer				*iBuffCube = nullptr;
 	ID3D11Buffer				*vPlanetMesh = nullptr;
 	ID3D11Buffer				*iPlanetMesh = nullptr;
+	ID3D11Buffer				*vShipMesh = nullptr;
+	ID3D11Buffer				*iShipMesh = nullptr;
 	ID3D11Buffer				*instanceBuff = nullptr;
 	ID3D11VertexShader			*vShader = nullptr;
 	ID3D11PixelShader			*pShader = nullptr;
@@ -122,6 +130,8 @@ private:
 	ID3D11PixelShader			*SkyPShader = nullptr;
 	ID3D11VertexShader			*PlanetVShader = nullptr;
 	ID3D11PixelShader			*PlanetPShader = nullptr;
+	ID3D11VertexShader			*ShipVShader = nullptr;
+	ID3D11PixelShader			*ShipPShader = nullptr;
 	ID3D11SamplerState			*mySampler = nullptr;
 	ID3D11Texture2D				*zBuffer = nullptr;
 	ID3D11Texture3D				*Skybox = nullptr;
@@ -133,7 +143,12 @@ private:
 	ID3D11ShaderResourceView	*meshTexture = nullptr;
 	ID3D11ShaderResourceView	*CmeshTexture = nullptr;
 	ID3D11ShaderResourceView	*PlanetTexture = nullptr;
+	ID3D11ShaderResourceView	*MoonTexture = nullptr;
 	ID3D11ShaderResourceView	*PlanetHeight = nullptr;
+	ID3D11ShaderResourceView	*IcePlanet  = nullptr;
+	ID3D11ShaderResourceView	*LastPlanet = nullptr;
+	ID3D11ShaderResourceView	*ShipTex = nullptr;
+	ID3D11ShaderResourceView	*NoHeight = nullptr;
 	ID3D11RasterizerState		*myRasterizer = nullptr;
 	ID3D11DepthStencilState		*zBuffState = nullptr;
 	CD3D11_VIEWPORT				myPort;

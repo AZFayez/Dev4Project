@@ -1,4 +1,5 @@
 Texture2D txHeight : register(t0);
+Texture2D tx2 : register(t1);
 SamplerState samLinear : register(s0);
 
 struct VS_INPUT
@@ -14,6 +15,7 @@ struct PS_INPUT
     float3 Norm : ONORMAL;
     float2 Tex : OTEXCOORD1;
     float3 Tex3D : OTEXCOORD2;
+    uint InstanceNo : IDNo;
 };
 
 struct Lights
@@ -35,23 +37,32 @@ cbuffer SHADER_VAR : register(b0)
     Lights light[3];
 };
 
-PS_INPUT main(VS_INPUT input)
+cbuffer INSTANCE : register(b1)
+{
+    float4x4 worldMat[10];
+};
+
+PS_INPUT main(VS_INPUT input, uint id : SV_InstanceID)
 {
     PS_INPUT output = (PS_INPUT) 0;
     
-    float3 height = txHeight.SampleLevel(samLinear, input.Tex, 0);
-    if (height.x < 1 && height.x >= 0.9f)
-        output.Pos = float4((input.Pos.xyz * height.xyz), 1);
-    else if (height.x < 0.9f)
-        output.Pos = float4((input.Pos.xyz * 0.85f), 1);
+    float4 height;
+    if (id == 0)
+        height = txHeight.SampleLevel(samLinear, input.Tex, 0);
     else
-        output.Pos = float4((input.Pos.xyz), 1);
+        height = tx2.SampleLevel(samLinear, input.Tex, 0);
     
-    output.Norm = mul(float4(input.Norm, 0), worldMatrix).xyz;
+    if (height.x < 0.75)
+        output.Pos = float4((input.Pos.xyz * 0.75f), 1);
+    else
+        output.Pos = float4((input.Pos.xyz * height.xyz), 1);
+    
+    output.Norm = mul(float4(input.Norm, 0), worldMat[id]).xyz;
     output.Tex = input.Tex;
     output.Tex3D = input.Pos;
+    output.InstanceNo = id;
     
-    output.Pos = mul(worldMatrix, output.Pos);
+    output.Pos = mul(worldMat[id], output.Pos);
     output.Pos = mul(viewMatrix, output.Pos);
     output.Pos = mul(projMatrix, output.Pos);
     
