@@ -418,23 +418,64 @@ void Drawingthings::Render()
 	{
 		XMVECTOR lighttemp = XMLoadFloat4(&MyMatracies.lights[0].lightDirection);
 		XMStoreFloat4(&MyMatracies.lights[0].lightDirection, XMVector4Transform(lighttemp, XMMatrixRotationY(-0.01f)));
+		ShipZ += 0.01f;
+		if (ShipZ >= (3.14f / 4))
+			ShipZ = 3.14f / 4;
 	}
-	if (GetAsyncKeyState(VK_RIGHT) && 0x8000)
+	else if (GetAsyncKeyState(VK_RIGHT) && 0x8000)
 	{
 		XMVECTOR lighttemp = XMLoadFloat4(&MyMatracies.lights[0].lightDirection);
 		XMStoreFloat4(&MyMatracies.lights[0].lightDirection, XMVector4Transform(lighttemp, XMMatrixRotationY(0.01f)));
+		ShipZ -= 0.01f;
+		if (ShipZ <= -(3.14f / 4))
+			ShipZ = -(3.14f / 4);
 	}
+	else if (ShipZ < 0)
+	{
+		ShipZ += 0.01f;
+	}
+	else if (ShipZ > 0)
+	{
+		ShipZ -= 0.01f;
+	}
+
+	if (GetAsyncKeyState(VK_DOWN) && 0x8000)
+	{
+		ShipX += 0.01f;
+		if (ShipX >= (3.14f / 8))
+			ShipX = 3.14f / 8;
+	}
+	else if (GetAsyncKeyState(VK_UP) && 0x8000)
+	{
+		ShipX -= 0.01f;
+		if (ShipX <= -(3.14f / 8))
+			ShipX = -(3.14f / 8);
+	}
+	else if (ShipX < 0)
+	{
+		ShipX += 0.01f;
+	}
+	else if (ShipX > 0)
+	{
+		ShipX -= 0.01f;
+	}
+
 	if (GetAsyncKeyState(0x31) && 0x8000)
 	{
 		CurrScene = STUPID;
+		camera.Reset();
 	}
 	if (GetAsyncKeyState(0x32) && 0x8000)
 	{
 		CurrScene = ISLAND;
+		camera.Reset();
 	}
 	if (GetAsyncKeyState(0x33) && 0x8000)
 	{
 		CurrScene = SPACE;
+		camera.Reset();
+		ShipX = 0;
+		ShipZ = 0;
 	}
 #pragma endregion
 
@@ -612,16 +653,19 @@ void Drawingthings::Render()
 
 #pragma region SpaceShip
 
-		myContext->IASetInputLayout(SkyLayout);
-		myContext->IASetVertexBuffers(0, 1, &vShipMesh, Cmesh_strides, Cmesh_offsets);
+		myContext->IASetInputLayout(myComplexMeshLayout);
+		myContext->IASetVertexBuffers(0, 1, &vShipMesh, Instance_strides, Instance_offsets);
 		myContext->IASetIndexBuffer(iShipMesh, DXGI_FORMAT_R32_UINT, 0);
 		myContext->VSSetShader(ShipVShader, 0, 0);
 		myContext->PSSetShader(ShipPShader, 0, 0);
 		myContext->PSSetShaderResources(0, 1, &ShipTex);
 
 		//MyMatracies.wMatrix = camera.getPosition();
-		//XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixMultiply(XMMatrixTranslation(0, -5, 0), XMLoadFloat4x4(&camera.getPosition())));
-		XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixIdentity());
+		XMMATRIX Shiptemp = XMMatrixMultiply(XMMatrixTranslation(0, -2, 5), XMLoadFloat4x4(&camera.getPositionRotation()));
+		Shiptemp = XMMatrixMultiply(XMMatrixRotationX(ShipX), Shiptemp);
+		Shiptemp = XMMatrixMultiply(XMMatrixRotationZ(ShipZ), Shiptemp);
+		XMStoreFloat4x4(&MyMatracies.wMatrix, Shiptemp);
+		//XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixIdentity());
 		hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
 		memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
 		myContext->Unmap(cBuff, 0);

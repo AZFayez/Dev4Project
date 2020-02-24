@@ -63,6 +63,13 @@ void CameraControl::Movement()
 		RotateY(-0.01f);
 	if (GetAsyncKeyState(VK_RIGHT) && 0x8000)
 		RotateY(0.01);
+	if (GetAsyncKeyState(VK_TAB) && 0x8000)
+		View = XMMatrixTranslation(0, 4, -10);
+}
+
+void CameraControl::Reset()
+{
+	View = XMMatrixTranslation(0, 4, -10);
 }
 
 XMFLOAT4X4 CameraControl::getPosition()
@@ -71,5 +78,12 @@ XMFLOAT4X4 CameraControl::getPosition()
 	XMVECTOR temp2 = View.r[3];
 	XMStoreFloat4x4(&temp, XMMatrixTranslation(temp2.m128_f32[0], temp2.m128_f32[1], temp2.m128_f32[2]));
 	//XMStoreFloat4x4(&temp, View);
+	return temp;
+}
+
+XMFLOAT4X4 CameraControl::getPositionRotation()
+{
+	XMFLOAT4X4 temp;
+	XMStoreFloat4x4(&temp, View);
 	return temp;
 }

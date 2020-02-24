@@ -11,11 +11,13 @@ public:
 	~CameraControl();
 	XMFLOAT4X4 getView();
 	XMFLOAT4X4 getPosition();
+	XMFLOAT4X4 getPositionRotation();
 	void RotateY(float deg);
 	void RotateX(float deg);
 	void TranslateUP(float x, float y, float z);
 	void TranslateSide(float x, float y, float z);
 	void Movement();
+	void Reset();
 	float translateX;
 	float translateY;
 	float translateZ;

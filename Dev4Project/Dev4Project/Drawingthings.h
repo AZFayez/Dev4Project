@@ -96,6 +96,8 @@ private:
 	float						zoom = 2.0f;
 	float						farplane = 1000;
 	float						nearplane = 0.1f;
+	float						ShipX = 0;
+	float						ShipZ = 0;
 	CameraControl				camera;
 	time_t						timer;
 	
