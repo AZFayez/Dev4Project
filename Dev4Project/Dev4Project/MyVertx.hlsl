@@ -47,6 +47,7 @@ OutputVert main( MyVertex input)
     
     Myout.pos = mul(worldMatrix, Myout.pos);
     Myout.pos = mul(viewMatrix, Myout.pos);
+    Myout.clr.w *= Myout.pos.w;
     Myout.pos = mul(projMatrix, Myout.pos);
     
 	return Myout;

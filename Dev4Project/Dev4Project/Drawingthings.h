@@ -17,6 +17,8 @@
 #include "PlanetShader.h"
 #include "ShipVertex.h"
 #include "ShipPixel.h"
+#include "WaterShader.h"
+#include "WaterPixelShader.h"
 #include "Assets/StoneHenge.h"
 #include "DDSTextureLoader.h"
 #include "CameraControl.h"
@@ -71,6 +73,9 @@ private:
 	SimpleMesh simplecube;
 	SimpleMesh Planet;
 	SimpleMesh SpaceShip;
+	SimpleMesh Island;
+	SimpleMesh Tree;
+	SimpleMesh waterP;
 
 	struct instance
 	{
@@ -92,6 +97,7 @@ private:
 	void LoadMesh(const char* meshFileName, SimpleMesh& mesh);
 	// Math
 	unsigned int				numverts = 0;
+	int							depth[3];
 	float						aspectRatio = 1;
 	float						zoom = 2.0f;
 	float						farplane = 1000;
@@ -110,6 +116,8 @@ private:
 	ID3D11InputLayout			*myComplexMeshLayout = nullptr;
 	ID3D11InputLayout			*SkyLayout = nullptr;
 	ID3D11Buffer				*vBuff = nullptr;
+	ID3D11Buffer				*vBuff1 = nullptr;
+	ID3D11Buffer				*vBuff2 = nullptr;
 	ID3D11Buffer				*cBuff = nullptr;
 	ID3D11Buffer				*vBuffMesh = nullptr;
 	ID3D11Buffer				*iBuffMesh = nullptr;
@@ -121,6 +129,12 @@ private:
 	ID3D11Buffer				*iPlanetMesh = nullptr;
 	ID3D11Buffer				*vShipMesh = nullptr;
 	ID3D11Buffer				*iShipMesh = nullptr;
+	ID3D11Buffer				*vIslandMesh = nullptr;
+	ID3D11Buffer				*iIslandMesh = nullptr;
+	ID3D11Buffer				*vTreeMesh = nullptr;
+	ID3D11Buffer				*iTreeMesh = nullptr;
+	ID3D11Buffer				*vWaterPlane = nullptr;
+	ID3D11Buffer				*iWaterPlane = nullptr;
 	ID3D11Buffer				*instanceBuff = nullptr;
 	ID3D11VertexShader			*vShader = nullptr;
 	ID3D11PixelShader			*pShader = nullptr;
@@ -134,6 +148,8 @@ private:
 	ID3D11PixelShader			*PlanetPShader = nullptr;
 	ID3D11VertexShader			*ShipVShader = nullptr;
 	ID3D11PixelShader			*ShipPShader = nullptr;
+	ID3D11VertexShader			*WaterVertex = nullptr;
+	ID3D11PixelShader			*WaterPixel = nullptr;
 	ID3D11SamplerState			*mySampler = nullptr;
 	ID3D11Texture2D				*zBuffer = nullptr;
 	ID3D11Texture3D				*Skybox = nullptr;
@@ -151,8 +167,12 @@ private:
 	ID3D11ShaderResourceView	*LastPlanet = nullptr;
 	ID3D11ShaderResourceView	*ShipTex = nullptr;
 	ID3D11ShaderResourceView	*NoHeight = nullptr;
+	ID3D11ShaderResourceView	*SandTexture = nullptr;
+	ID3D11ShaderResourceView	*TreeTex = nullptr;
+	ID3D11ShaderResourceView	*WaterT = nullptr;
 	ID3D11RasterizerState		*myRasterizer = nullptr;
 	ID3D11DepthStencilState		*zBuffState = nullptr;
+	ID3D11BlendState			*myBlend = nullptr;
 	CD3D11_VIEWPORT				myPort;
 	D3D_FEATURE_LEVEL			dx11;
 	DXGI_SWAP_CHAIN_DESC		swap;

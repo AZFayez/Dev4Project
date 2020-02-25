@@ -87,3 +87,8 @@ XMFLOAT4X4 CameraControl::getPositionRotation()
 	XMStoreFloat4x4(&temp, View);
 	return temp;
 }
+
+XMVECTOR CameraControl::getPositionV()
+{
+	return  View.r[3];
+}

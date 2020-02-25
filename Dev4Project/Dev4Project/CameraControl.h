@@ -12,6 +12,7 @@ public:
 	XMFLOAT4X4 getView();
 	XMFLOAT4X4 getPosition();
 	XMFLOAT4X4 getPositionRotation();
+	XMVECTOR getPositionV();
 	void RotateY(float deg);
 	void RotateX(float deg);
 	void TranslateUP(float x, float y, float z);

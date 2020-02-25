@@ -25,6 +25,64 @@ Drawingthings::Drawingthings()
 	}
 }
 
+MyVertex tri[] =
+{
+	//front
+	{ {0, 1, 0, 1}, {1, 0, 0, 0.5f} },
+	{ {0.25f, -0.25f, -0.25f, 1}, {1, 0, 0, 0.5f} },
+	{ {-0.25f, -0.25f, -0.25f, 1}, {1, 0, 0, 0.5f} },
+	//right
+	{ {0, 1, 0, 1}, {1, 0, 0, 0.5f} },
+	{ {0.25f, -0.25f, 0.25f, 1}, {1, 0, 0, 0.5f} },
+	{ {0.25f, -0.25f, -0.25f, 1}, {1, 0, 0, 0.5f} },
+	//back
+	{ {0, 1, 0, 1}, {1, 0, 0, 0.5f} },
+	{ {-0.25f, -0.25f, 0.25f, 1},{1, 0, 0, 0.5f}  },
+	{ {0.25f, -0.25f, 0.25f, 1},  {1, 0, 0, 0.5f}},
+	//left
+	{ {0, 1, 0, 1}, {1, 0, 0, 0.5f} },
+	{ {-0.25f, -0.25f, -0.25f, 1}, {1, 0, 0, 0.5f} },
+	{ {-0.25f, -0.25f, 0.25f, 1}, {1, 0, 0, 0.5f} },
+};
+MyVertex tri2[] =
+{
+	//front
+	{ {0, 1, 0, 1}, {0, 1, 0, 0.5f} },
+	{ {0.25f, -0.25f, -0.25f, 1}, {0, 1, 0, 0.5f} },
+	{ {-0.25f, -0.25f, -0.25f, 1}, {0, 1, 0, 0.5f} },
+	//right
+	{ {0, 1, 0, 1}, {0, 1, 0, 0.5f} },
+	{ {0.25f, -0.25f, 0.25f, 1}, {0, 1, 0, 0.5f} },
+	{ {0.25f, -0.25f, -0.25f, 1}, {0, 1, 0, 0.5f} },
+	//back
+	{ {0, 1, 0, 1}, {0, 1, 0, 0.5f} },
+	{ {-0.25f, -0.25f, 0.25f, 1},{0, 1, 0, 0.5f}  },
+	{ {0.25f, -0.25f, 0.25f, 1},  {0, 1, 0, 0.5f}},
+	//left
+	{ {0, 1, 0, 1}, {0, 1, 0, 0.5f} },
+	{ {-0.25f, -0.25f, -0.25f, 1}, {0, 1, 0, 0.5f} },
+	{ {-0.25f, -0.25f, 0.25f, 1}, {0, 1, 0, 0.5f} },
+};
+MyVertex tri3[] =
+{
+	//front
+	{ {0, 1, 0, 1}, {0, 0, 1, 0.5f} },
+	{ {0.25f, -0.25f, -0.25f, 1}, {0, 0, 1, 0.5f} },
+	{ {-0.25f, -0.25f, -0.25f, 1}, {0, 0, 1, 0.5f} },
+	//right
+	{ {0, 1, 0, 1}, {0, 0, 1, 0.5f} },
+	{ {0.25f, -0.25f, 0.25f, 1}, {0, 0, 1, 0.5f} },
+	{ {0.25f, -0.25f, -0.25f, 1}, {0, 0, 1, 0.5f} },
+	//back
+	{ {0, 1, 0, 1}, {0, 0, 1, 0.5f} },
+	{ {-0.25f, -0.25f, 0.25f, 1},{0, 0, 1, 0.5f}  },
+	{ {0.25f, -0.25f, 0.25f, 1},  {0, 0, 1, 0.5f}},
+	//left
+	{ {0, 1, 0, 1}, {0, 0, 1, 0.5f} },
+	{ {-0.25f, -0.25f, -0.25f, 1}, {0, 0, 1, 0.5f} },
+	{ {-0.25f, -0.25f, 0.25f, 1}, {0, 0, 1, 0.5f} },
+};
+
 Drawingthings::~Drawingthings()
 {
 	if (myDevice) myDevice->Release();
@@ -34,6 +92,8 @@ Drawingthings::~Drawingthings()
 	if (myLayout) myLayout->Release();
 	if (myMeshLayout) myMeshLayout->Release();
 	if (vBuff) vBuff->Release();
+	if (vBuff1) vBuff1->Release();
+	if (vBuff2) vBuff2->Release();
 	if (cBuff) cBuff->Release();
 	if (vShader) vShader->Release();
 	if (vMeshShader) vMeshShader->Release();
@@ -79,6 +139,18 @@ Drawingthings::~Drawingthings()
 	if (ShipTex) ShipTex->Release();
 	if (ShipVShader) ShipVShader->Release();
 	if (ShipPShader) ShipPShader->Release();
+	if (vIslandMesh) vIslandMesh->Release();
+	if (iIslandMesh) iIslandMesh->Release();
+	if (SandTexture) SandTexture->Release();
+	if (TreeTex) TreeTex->Release();
+	if (vTreeMesh) vTreeMesh->Release();
+	if (iTreeMesh) iTreeMesh->Release();
+	if (vWaterPlane) vWaterPlane->Release();
+	if (iWaterPlane) iWaterPlane->Release();
+	if (WaterT) WaterT->Release();
+	if (WaterVertex) WaterVertex->Release();
+	if (WaterPixel) WaterPixel->Release();
+	if (myBlend) myBlend->Release();
 }
 
 void Drawingthings::Init(HWND& hwnd)
@@ -118,26 +190,6 @@ void Drawingthings::Init(HWND& hwnd)
 	myPort.MinDepth = 0;
 	myPort.MaxDepth = 1;
 
-	MyVertex tri[] =
-	{
-		//front
-		{ {0, 1, 0, 1}, {1, 1, 0, 1} },
-		{ {0.25f, -0.25f, -0.25f, 1}, {1, 0, 1, 1} },
-		{ {-0.25f, -0.25f, -0.25f, 1}, {0, 1, 1, 1} },
-		//right
-		{ {0, 1, 0, 1}, {1, 1, 0, 1} },
-		{ {0.25f, -0.25f, 0.25f, 1}, {0, 1, 1, 1} },
-		{ {0.25f, -0.25f, -0.25f, 1}, {1, 0, 1, 1} },
-		//back
-		{ {0, 1, 0, 1}, {1, 1, 0, 1} },
-		{ {-0.25f, -0.25f, 0.25f, 1},{1, 0, 1, 1}  },
-		{ {0.25f, -0.25f, 0.25f, 1},  {0, 1, 1, 1}},
-		//left
-		{ {0, 1, 0, 1}, {1, 1, 0, 1} },
-		{ {-0.25f, -0.25f, -0.25f, 1}, {0, 1, 1, 1} },
-		{ {-0.25f, -0.25f, 0.25f, 1}, {1, 0, 1, 1} },
-	};
-
 	numverts = ARRAYSIZE(tri);
 
 	//load vertexes to card
@@ -156,6 +208,14 @@ void Drawingthings::Init(HWND& hwnd)
 	subData.pSysMem = tri;
 
 	hr = myDevice->CreateBuffer(&bDesc, &subData, &vBuff);
+
+	subData.pSysMem = tri2;
+
+	hr = myDevice->CreateBuffer(&bDesc, &subData, &vBuff1);
+
+	subData.pSysMem = tri3;
+
+	hr = myDevice->CreateBuffer(&bDesc, &subData, &vBuff2);
 
 	//write compile load shaders
 
@@ -365,8 +425,34 @@ void Drawingthings::Init(HWND& hwnd)
 	myDevice->CreateVertexShader(ShipVertex, sizeof(ShipVertex), nullptr, &ShipVShader);
 	myDevice->CreatePixelShader(ShipPixel, sizeof(ShipPixel), nullptr, &ShipPShader);
 	
-		
+	CreateModel(Island, "./Assets/island.mesh", &vIslandMesh, &iIslandMesh);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/sand.dds", nullptr, &SandTexture);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/PalmT.dds", nullptr, &TreeTex);
 
+	CreateModel(Tree, "./Assets/PTree.mesh", &vTreeMesh, &iTreeMesh);
+
+	CreateModel(waterP, "./Assets/WaterP.mesh", &vWaterPlane, &iWaterPlane);
+	hr = CreateDDSTextureFromFile(myDevice, L"./Assets/waterT.dds", nullptr, &WaterT);
+
+	myDevice->CreateVertexShader(WaterShader, sizeof(WaterShader), nullptr, &WaterVertex);
+	myDevice->CreatePixelShader(WaterPixelShader, sizeof(WaterPixelShader), nullptr, &WaterPixel);
+
+	D3D11_BLEND_DESC blendDesc;
+
+	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.IndependentBlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	hr = myDevice->CreateBlendState( &blendDesc, &myBlend);
 }
 
 void Drawingthings::Render()
@@ -399,7 +485,7 @@ void Drawingthings::Render()
 	if (GetAsyncKeyState(0x4D) && 0x8000)
 	{
 		nearplane -= 0.01f;
-		if (nearplane <0.1f)
+		if (nearplane < 0.1f)
 			nearplane = 0.1f;
 	}
 	if (GetAsyncKeyState(0x43) && 0x8000)
@@ -468,6 +554,7 @@ void Drawingthings::Render()
 	if (GetAsyncKeyState(0x32) && 0x8000)
 	{
 		CurrScene = ISLAND;
+		MyMatracies.lights[0]._constant = 0;
 		camera.Reset();
 	}
 	if (GetAsyncKeyState(0x33) && 0x8000)
@@ -485,9 +572,14 @@ void Drawingthings::Render()
 	// output merger
 	ID3D11RenderTargetView* tempRTv[] = { myTargetv };
 	myContext->OMSetRenderTargets(1, tempRTv, zBufferView);
+
+	float blendfactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	UINT mask = 0xffffffff;
+
 	myContext->ClearRenderTargetView(myTargetv, color);
 	//clear z buffer
 	myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
+	myContext->OMSetBlendState(myBlend, blendfactor, mask);
 	// setup the pipeline)
 	myContext->RSSetState(myRasterizer);
 	// rasterizer
@@ -503,8 +595,69 @@ void Drawingthings::Render()
 	UINT Instance_offsets[] = { 0 };
 	ID3D11Buffer* CmeshVB[] = { vBuffCMesh };
 
+	UINT strides[] = { sizeof(MyVertex) };
+	UINT offset[] = {0};
+
+	ID3D11Buffer* transperancy[] = { vBuff,vBuff1,vBuff2 };
+
 	ID3D11ShaderResourceView* HeightMaps[] = { PlanetHeight, NoHeight };
 	ID3D11ShaderResourceView* PlanetInstancingTextures[] = { PlanetTexture, MoonTexture, LastPlanet, IcePlanet };
+	
+	XMMATRIX triWorld[] =
+	{
+		XMMatrixMultiply(XMMatrixScaling(2, 2, 2), XMMatrixTranslation(0, 3, -5)),
+		XMMatrixMultiply(XMMatrixScaling(2, 2, 2), XMMatrixTranslation(0, 3, -6)),
+		XMMatrixMultiply(XMMatrixScaling(2, 2, 2), XMMatrixTranslation(0, 3, -7)),
+	};
+
+	XMVECTOR camdepth = camera.getPositionV();
+	XMVECTOR tri1depth = XMVector4Transform({tri[0].pos[0] ,tri[0].pos[1] , tri[0].pos[2] , tri[0].pos[3] }, triWorld[0]);
+	XMVECTOR tri2depth = XMVector4Transform({tri2[0].pos[0] ,tri2[0].pos[1] , tri2[0].pos[2] , tri2[0].pos[3] }, triWorld[1]);
+	XMVECTOR tri3depth = XMVector4Transform({tri3[0].pos[0] ,tri3[0].pos[1] , tri3[0].pos[2] , tri3[0].pos[3] }, triWorld[2]);
+
+	tri1depth = XMVectorSubtract(camdepth, tri1depth);
+	tri2depth = XMVectorSubtract(camdepth, tri2depth);
+	tri3depth = XMVectorSubtract(camdepth, tri3depth);
+
+	tri1depth = XMVector4Dot(tri1depth, tri1depth);
+	tri2depth = XMVector4Dot(tri2depth, tri2depth);
+	tri3depth = XMVector4Dot(tri3depth, tri3depth);
+
+	float mags[3] = { tri1depth.m128_f32[2], tri2depth.m128_f32[2], tri3depth.m128_f32[2] };
+	depth[0] = 0;
+	depth[1] = 1;
+	depth[2] = 2;
+	
+	if (mags[1] > mags[0])
+	{
+		float tmpf = mags[0];
+		mags[0] = mags[1];
+		mags[1] = tmpf;
+
+		int tempi = depth[0];
+		depth[0] = depth[1];
+		depth[1] = tempi;
+	}
+	if (mags[2] > mags[1])
+	{
+		float tmpf = mags[1];
+		mags[1] = mags[2];
+		mags[2] = tmpf;
+
+		int tempi = depth[1];
+		depth[1] = depth[2];
+		depth[2] = tempi;
+		if (mags[1] > mags[0])
+		{
+			float tmpf = mags[0];
+			mags[0] = mags[1];
+			mags[1] = tmpf;
+
+			int tempi = depth[0];
+			depth[0] = depth[1];
+			depth[1] = tempi;
+		}
+	}
 
 #pragma endregion
 
@@ -563,9 +716,6 @@ void Drawingthings::Render()
 
 	//drawing second item
 	myContext->IASetInputLayout(myMeshLayout);
-	//UINT mesh_strides[] = { sizeof(_OBJ_VERT_) };
-	//UINT mesh_offsets[] = { 0 };
-	//ID3D11Buffer* meshVB[] = { vBuffMesh };
 
 	myContext->IASetVertexBuffers(0, 1, meshVB, mesh_strides, mesh_offsets);
 	myContext->IASetIndexBuffer(iBuffMesh, DXGI_FORMAT_R32_UINT, 0);
@@ -608,6 +758,32 @@ void Drawingthings::Render()
 	myContext->DrawIndexedInstanced(simpleMesh.indicesList.size(), 10, 0, 0, 0);
 
 #pragma endregion
+
+#pragma region triangles
+
+	for (int i = 0; i < 3; i++)
+	{
+		myContext->IASetInputLayout(myLayout);
+
+		myContext->IASetVertexBuffers(0, 1, &transperancy[depth[i]], strides, offset);
+		myContext->VSSetShader(vShader, 0, 0);
+		myContext->PSSetShader(pShader, 0, 0);
+
+		//change world matrix
+		XMStoreFloat4x4(&MyMatracies.wMatrix, triWorld[depth[i]]);
+		//upload new matrix to video card
+		hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+		memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+		myContext->Unmap(cBuff, 0);
+		myContext->PSSetConstantBuffers(0, 1, constants);
+
+		myContext->Draw(12, 0);
+	}
+
+
+#pragma endregion
+
+
 		break;
 	case Drawingthings::SPACE:
 		myContext->PSSetShaderResources(0, 1, &SkyboxTextureSpace);
@@ -680,6 +856,65 @@ void Drawingthings::Render()
 		myContext->PSSetShaderResources(0, 1, &SkyboxTextureIsland);
 		myContext->DrawIndexed(simplecube.indicesList.size(), 0, 0);
 		myContext->ClearDepthStencilView(zBufferView, D3D11_CLEAR_DEPTH, 1, 1);
+
+#pragma region Island
+
+		myContext->IASetInputLayout(myComplexMeshLayout);
+		myContext->IASetVertexBuffers(0, 1, &vIslandMesh, Instance_strides, Instance_offsets);
+		myContext->IASetIndexBuffer(iIslandMesh, DXGI_FORMAT_R32_UINT, 0);
+		myContext->VSSetShader(ShipVShader, 0, 0);
+		myContext->PSSetShader(ShipPShader, 0, 0);
+		myContext->PSSetShaderResources(0, 1, &SandTexture);
+
+		XMStoreFloat4x4(&MyMatracies.wMatrix,XMMatrixMultiply(XMMatrixScaling(2,1,2), XMMatrixIdentity()));
+		hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+		memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+		myContext->Unmap(cBuff, 0);
+
+		myContext->DrawIndexed(Island.indicesList.size(), 0, 0);
+
+#pragma endregion
+
+#pragma region PlamTree
+
+		myContext->IASetInputLayout(myComplexMeshLayout);
+		myContext->IASetVertexBuffers(0, 1, &vTreeMesh, Instance_strides, Instance_offsets);
+		myContext->IASetIndexBuffer(iTreeMesh, DXGI_FORMAT_R32_UINT, 0);
+		myContext->VSSetShader(ShipVShader, 0, 0);
+		myContext->PSSetShader(ShipPShader, 0, 0);
+		myContext->PSSetShaderResources(0, 1, &TreeTex);
+
+		XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixTranslation(0,3.3f,0));
+		hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+		memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+		myContext->Unmap(cBuff, 0);
+
+		myContext->DrawIndexed(Tree.indicesList.size(), 0, 0);
+
+#pragma endregion
+
+
+#pragma region Water
+
+		myContext->IASetInputLayout(myComplexMeshLayout);
+		myContext->IASetVertexBuffers(0, 1, &vWaterPlane, Instance_strides, Instance_offsets);
+		myContext->IASetIndexBuffer(iWaterPlane, DXGI_FORMAT_R32_UINT, 0);
+		myContext->VSSetShader(WaterVertex, 0, 0);
+		myContext->VSSetShaderResources(0, 1, &WaterT);
+		myContext->PSSetShader(WaterPixel, 0, 0);
+		myContext->PSSetShaderResources(0, 1, &WaterT);
+
+		MyMatracies.lights[0]._constant += 0.01;
+		XMStoreFloat4x4(&MyMatracies.wMatrix, XMMatrixMultiply(XMMatrixScaling(10, 1, 10), XMMatrixTranslation(0,1,0)));
+		hr = myContext->Map(cBuff, 0, D3D11_MAP_WRITE_DISCARD, 0, &gpuBuff);
+		memcpy(gpuBuff.pData, &MyMatracies, sizeof(WVP));
+		myContext->Unmap(cBuff, 0);
+
+		myContext->DrawIndexed(waterP.indicesList.size(), 0, 0);
+
+#pragma endregion
+
+
 		break;
 	default:
 		break;

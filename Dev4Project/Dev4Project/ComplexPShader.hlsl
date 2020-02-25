@@ -52,5 +52,9 @@ float4 main(PS_INPUT inputPixel) : SV_TARGET
     float SpotAtten = 1 - saturate((light[2].cosineInnerCone - SurfaceRatio) / (light[2].cosineInnerCone - light[2].cosineOuterCone));
     SpotColor *= SpotAtten;
     
+    Pointlight.w = 1;
+    Dirlight.w = 1;
+    SpotColor.w = 1;
+    
     return finalColor * saturate(Pointlight + Dirlight + SpotColor);
 }
